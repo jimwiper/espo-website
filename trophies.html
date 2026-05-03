@@ -1,0 +1,255 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><title>TROPHIES — espo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Anton&family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="subpage.css">
+<style>
+:root { --danger: #ff4646; }
+.trophy-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:48px; }
+.trophy-card {
+  background:var(--panel); border:1px solid var(--line); padding:28px;
+  position:relative; overflow:hidden; cursor:pointer; transition:all .25s;
+  text-decoration:none; color:var(--ink); display:block;
+}
+.trophy-card:hover { border-color:var(--accent-3); transform:translateY(-3px); box-shadow:0 12px 40px -12px color-mix(in oklab,var(--accent-3) 30%,transparent); }
+.trophy-card.featured { grid-column:span 2; background:linear-gradient(135deg,color-mix(in oklab,var(--accent-3) 10%,var(--panel)),var(--panel)); border-color:var(--accent-3); }
+.trophy-rank { font-family:var(--font-display); font-size:72px; line-height:1; font-weight:900; margin-bottom:10px; }
+.trophy-card.featured .trophy-rank { font-size:140px; }
+.trophy-event { font-family:var(--font-head); font-size:18px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+.trophy-card.featured .trophy-event { font-size:28px; }
+.trophy-meta { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+.trophy-date { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.15em; }
+.trophy-game { font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:.15em; padding:2px 6px; border:1px solid var(--accent); }
+.trophy-prize { font-family:var(--font-mono); font-size:11px; color:var(--accent-3); letter-spacing:.1em; }
+.trophy-team { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.team-chip { font-family:var(--font-mono); font-size:10px; padding:3px 8px; border:1px solid var(--line); color:var(--ink-2); letter-spacing:.1em; }
+.trophy-arrow { position:absolute; bottom:16px; right:16px; font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.15em; opacity:0; transition:opacity .2s; }
+.trophy-card:hover .trophy-arrow { opacity:1; }
+
+.article-placeholder {
+  background:var(--panel); border:1px solid var(--line); padding:32px;
+  display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center;
+  transition:all .2s; cursor:pointer; text-decoration:none; color:var(--ink);
+  margin-bottom:12px;
+}
+.article-placeholder:hover { border-color:var(--accent); }
+.article-date { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.2em; margin-bottom:6px; }
+.article-title { font-family:var(--font-head); font-size:18px; letter-spacing:.05em; text-transform:uppercase; margin:0 0 6px; }
+.article-desc { font-size:13px; color:var(--ink-2); margin:0; }
+.article-tag { font-family:var(--font-mono); font-size:10px; padding:3px 8px; border:1px solid var(--line); color:var(--ink-3); letter-spacing:.15em; white-space:nowrap; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:64px; }
+.stat-card { background:var(--panel); border:1px solid var(--line); padding:20px; text-align:center; }
+.stat-val { font-family:var(--font-display); font-size:48px; font-weight:900; line-height:1; }
+.stat-label { font-family:var(--font-mono); font-size:10px; color:var(--ink-3); letter-spacing:.2em; margin-top:6px; }
+
+@media(max-width:960px){ .trophy-grid{grid-template-columns:1fr 1fr;} .trophy-card.featured{grid-column:auto;} .stats-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:600px){ .trophy-grid{grid-template-columns:1fr;} .article-placeholder{grid-template-columns:1fr;} }
+</style>
+</head><body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">e</span><span>espo<span style="color:var(--accent)">.</span></span></a>
+    <div class="nav-links">
+      <a href="index.html#live">LIVE</a>
+      <a href="index.html#members">MEMBERS</a>
+      <a href="trophies.html" style="color:var(--accent)">TROPHIES</a>
+      <a href="index.html#media">MEDIA</a>
+      <a href="store.html">GOODS</a>
+    </div>
+    <div class="nav-cta" style="display:flex;align-items:center;">
+      <div class="lang-toggle"><button class="on">JP</button><button>EN</button></div>
+      <a href="audition.html" class="btn btn-solid">AUDITION →</a>
+    </div>
+  </div>
+</nav>
+<button class="back-btn" onclick="history.back()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  BACK
+</button>
+
+<section style="padding:160px 32px 80px;max-width:1400px;margin:0 auto;border-bottom:1px solid var(--line);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 70% 40%,color-mix(in oklab,var(--accent-3) 15%,transparent),transparent 60%);pointer-events:none;"></div>
+  <div style="position:relative;">
+    <div class="page-kicker">TROPHIES / 戦績</div>
+    <h1 class="page-title"><span class="stroke">WE</span><br><span class="accent">WIN</span>.</h1>
+    <p class="page-sub">espoが積み上げてきた勝利の記録。</p>
+  </div>
+</section>
+
+<div class="page-body">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-3);">47</div><div class="stat-label">TOTAL TROPHIES</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent);">28</div><div class="stat-label">1ST PLACE</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-2);">12</div><div class="stat-label">TOURNAMENTS</div></div>
+    <div class="stat-card"><div class="stat-val">¥18M</div><div class="stat-label">PRIZE TOTAL</div></div>
+  </div>
+
+  <!-- TROPHY CARDS -->
+  <div class="sec-head" style="margin-bottom:32px;">
+    <h2><span style="color:var(--accent-3);">RESULTS</span></h2>
+    <p>大会成績一覧</p>
+  </div>
+  <div class="trophy-grid">
+    
+    <a href="trophy-article.html?id=neo-s5" class="trophy-card featured">
+      <div class="trophy-rank" style="color:var(--accent-3)">1ST</div>
+      <div class="trophy-event">NEO LEAGUE SEASON 5</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.12.20</span>
+        <span class="trophy-game">VALORITE</span>
+        <span class="trophy-prize">¥5,000,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">NYX</span><span class="team-chip">SHIROI</span><span class="team-chip">AZURE</span><span class="team-chip">YUME</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=fgt-wc" class="trophy-card">
+      <div class="trophy-rank" style="color:var(--accent-3)">1ST</div>
+      <div class="trophy-event">FGT WORLD CUP</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.11.02</span>
+        <span class="trophy-game">FGT WORLD</span>
+        <span class="trophy-prize">¥1,200,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">RIKO</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=lore-champ" class="trophy-card">
+      <div class="trophy-rank" style="color:#c0c0c0">2ND</div>
+      <div class="trophy-event">LOREWEAVE CHAMPIONSHIP</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.10.15</span>
+        <span class="trophy-game">LOREWEAVE</span>
+        <span class="trophy-prize">¥800,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">KOMORI</span><span class="team-chip">PIPPA</span><span class="team-chip">HIRU</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=val-inv" class="trophy-card">
+      <div class="trophy-rank" style="color:var(--accent-3)">1ST</div>
+      <div class="trophy-event">VALORITE INVITATIONAL</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.09.08</span>
+        <span class="trophy-game">VALORITE</span>
+        <span class="trophy-prize">¥2,000,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">NYX</span><span class="team-chip">CARNELIAN</span><span class="team-chip">MOMO</span><span class="team-chip">RAIKA</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=moba-nat" class="trophy-card">
+      <div class="trophy-rank" style="color:#cd7f32">3RD</div>
+      <div class="trophy-event">MOBA NATION</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.08.22</span>
+        <span class="trophy-game">MOBA</span>
+        <span class="trophy-prize">¥400,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">TSUKI</span><span class="team-chip">KUROI</span><span class="team-chip">HIRU</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=neo-s4" class="trophy-card">
+      <div class="trophy-rank" style="color:#c0c0c0">2ND</div>
+      <div class="trophy-event">NEO LEAGUE SEASON 4</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.03.18</span>
+        <span class="trophy-game">VALORITE</span>
+        <span class="trophy-prize">¥2,500,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">NYX</span><span class="team-chip">SHIROI</span><span class="team-chip">AZURE</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=fgt-jp" class="trophy-card">
+      <div class="trophy-rank" style="color:var(--accent-3)">1ST</div>
+      <div class="trophy-event">FGT JAPAN OPEN</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2025.01.30</span>
+        <span class="trophy-game">FGT WORLD</span>
+        <span class="trophy-prize">¥600,000</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">RIKO</span><span class="team-chip">NOKO</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+    <a href="trophy-article.html?id=debut-cup" class="trophy-card">
+      <div class="trophy-rank" style="color:var(--accent-3)">1ST</div>
+      <div class="trophy-event">espo DEBUT CUP</div>
+      <div class="trophy-meta">
+        <span class="trophy-date">2024.06.01</span>
+        <span class="trophy-game">VALORITE</span>
+        <span class="trophy-prize">COMMEMORATIVE</span>
+      </div>
+      <div class="trophy-team">
+        <span class="team-chip">NYX</span><span class="team-chip">SHIROI</span>
+      </div>
+      <span class="trophy-arrow">DETAIL →</span>
+    </a>
+  </div>
+
+  <!-- RELATED ARTICLES -->
+  <div class="sec-head" style="margin-bottom:32px;">
+    <h2><span style="color:var(--accent);">REPORTS</span></h2>
+    <p>大会レポート・記事（準備中）</p>
+  </div>
+  
+  <a href="trophy-article.html?id=neo-s5" class="article-placeholder">
+    <div>
+      <div class="article-date">2025.12.20 ／ VALORITE</div>
+      <div class="article-title">NEO LEAGUE SEASON 5 — 1ST PLACE レポート</div>
+      <p class="article-desc">NYX / SHIROI / AZURE / YUME による戦いの記録。大会概要・試合結果・選手コメントを掲載予定。</p>
+    </div>
+    <span class="article-tag">COMING SOON</span>
+  </a>
+  <a href="trophy-article.html?id=fgt-wc" class="article-placeholder">
+    <div>
+      <div class="article-date">2025.11.02 ／ FGT WORLD</div>
+      <div class="article-title">FGT WORLD CUP — 1ST PLACE レポート</div>
+      <p class="article-desc">RIKO による戦いの記録。大会概要・試合結果・選手コメントを掲載予定。</p>
+    </div>
+    <span class="article-tag">COMING SOON</span>
+  </a>
+  <a href="trophy-article.html?id=lore-champ" class="article-placeholder">
+    <div>
+      <div class="article-date">2025.10.15 ／ LOREWEAVE</div>
+      <div class="article-title">LOREWEAVE CHAMPIONSHIP — 2ND PLACE レポート</div>
+      <p class="article-desc">KOMORI / PIPPA / HIRU による戦いの記録。大会概要・試合結果・選手コメントを掲載予定。</p>
+    </div>
+    <span class="article-tag">COMING SOON</span>
+  </a>
+  <a href="trophy-article.html?id=val-inv" class="article-placeholder">
+    <div>
+      <div class="article-date">2025.09.08 ／ VALORITE</div>
+      <div class="article-title">VALORITE INVITATIONAL — 1ST PLACE レポート</div>
+      <p class="article-desc">NYX / CARNELIAN / MOMO / RAIKA による戦いの記録。大会概要・試合結果・選手コメントを掲載予定。</p>
+    </div>
+    <span class="article-tag">COMING SOON</span>
+  </a>
+  <a href="trophy-article.html?id=moba-nat" class="article-placeholder">
+    <div>
+      <div class="article-date">2025.08.22 ／ MOBA</div>
+      <div class="article-title">MOBA NATION — 3RD PLACE レポート</div>
+      <p class="article-desc">TSUKI / KUROI / HIRU による戦いの記録。大会概要・試合結果・選手コメントを掲載予定。</p>
+    </div>
+    <span class="article-tag">COMING SOON</span>
+  </a>
+
+</div>
+
+<footer class="foot"><div class="foot-top"><div><div class="foot-big"><span class="stroke">FOR</span> <span class="accent">THE</span><br><span class="accent">CROWN</span>.</div><div class="foot-caption">espo — VIRTUAL ESPORTS PROJECT © 2026</div></div><div class="foot-col"><h5>SITE</h5><ul><li><a href="about.html">ABOUT</a></li><li><a href="index.html#members">MEMBERS</a></li><li><a href="trophies.html">TROPHIES</a></li><li><a href="index.html#media">MEDIA</a></li></ul></div><div class="foot-col"><h5>SUPPORT</h5><ul><li><a href="fanclub.html">FAN CLUB</a></li><li><a href="store.html">STORE</a></li><li><a href="guidelines.html">GUIDELINES</a></li><li><a href="faq.html">FAQ</a></li></ul></div><div class="foot-col"><h5>COMPANY</h5><ul><li><a href="corporate.html">CORPORATE</a></li><li><a href="careers.html">CAREERS</a></li><li><a href="contact.html">CONTACT</a></li><li><a href="press.html">PRESS</a></li></ul></div></div><div class="foot-bot"><div>© 2026 espo. ALL RIGHTS RESERVED. — 架空のブランドです。</div></div></footer>
+</body></html>

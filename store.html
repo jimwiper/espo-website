@@ -1,0 +1,837 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><title>STORE — espo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Anton&family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="subpage.css">
+<style>
+/* ===== CART DRAWER ===== */
+#cart-drawer {
+  position:fixed; top:0; right:0; bottom:0; width:min(480px,100vw);
+  background:var(--panel); border-left:1px solid var(--accent);
+  z-index:500; display:flex; flex-direction:column;
+  transform:translateX(100%); transition:transform .35s cubic-bezier(.2,.9,.2,1);
+  box-shadow:-20px 0 60px rgba(0,0,0,.6);
+}
+#cart-drawer.open { transform:translateX(0); }
+#cart-overlay { position:fixed;inset:0;background:rgba(3,5,12,.6);z-index:499;display:none;backdrop-filter:blur(4px); }
+#cart-overlay.open { display:block; }
+
+.cart-head { display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line);flex-shrink:0; }
+.cart-head h2 { font-family:var(--font-display);font-size:20px;margin:0;text-transform:uppercase;letter-spacing:.1em; }
+.cart-head .count { font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:.2em; }
+.cart-close { width:36px;height:36px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);cursor:pointer;transition:all .15s; }
+.cart-close:hover { border-color:var(--accent);color:var(--accent); }
+
+.cart-items { flex:1;overflow-y:auto;padding:16px 24px; }
+.cart-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--ink-3); }
+.cart-empty .big { font-family:var(--font-display);font-size:48px;opacity:.2; }
+
+.cart-item { display:grid;grid-template-columns:72px 1fr auto;gap:16px;align-items:start;padding:16px 0;border-bottom:1px solid var(--line); }
+.cart-item-img { aspect-ratio:1;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden; }
+.cart-item-name { font-family:var(--font-head);font-size:14px;letter-spacing:.05em;margin:0 0 4px; }
+.cart-item-variant { font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:.15em; }
+.cart-item-price { font-family:var(--font-display);font-size:18px;color:var(--accent-2);font-weight:900;white-space:nowrap; }
+.qty-ctrl { display:flex;align-items:center;gap:0;margin-top:8px;border:1px solid var(--line);width:fit-content; }
+.qty-ctrl button { width:28px;height:28px;display:grid;place-items:center;font-size:14px;color:var(--ink);cursor:pointer;transition:all .15s; }
+.qty-ctrl button:hover { background:var(--accent);color:#000; }
+.qty-ctrl span { width:32px;text-align:center;font-family:var(--font-mono);font-size:13px; }
+.remove-btn { font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;cursor:pointer;transition:color .15s;background:none;border:none;padding:4px 0;display:block;margin-top:6px; }
+.remove-btn:hover { color:#ff4646; }
+
+.cart-footer { padding:20px 24px;border-top:1px solid var(--line);flex-shrink:0; }
+.cart-summary { margin-bottom:16px; }
+.cart-row { display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:8px;font-family:var(--font-mono); }
+.cart-row.total { font-size:18px;color:var(--ink);padding-top:12px;border-top:1px solid var(--line);font-family:var(--font-display);font-weight:900; }
+.cart-row.total span:last-child { color:var(--accent-2); }
+
+/* ===== PRODUCT MODAL ===== */
+#product-overlay { position:fixed;inset:0;background:rgba(3,5,12,.85);backdrop-filter:blur(12px);z-index:400;display:none;place-items:center;padding:20px; }
+#product-overlay.open { display:grid; }
+#product-modal { background:var(--panel);border:1px solid var(--accent);width:min(720px,92vw);max-height:88vh;overflow:auto;position:relative; }
+
+.product-modal-grid { display:grid;grid-template-columns:320px 1fr; }
+.product-modal-visual { aspect-ratio:1;display:grid;place-items:center;position:relative;min-width:0; }
+.product-modal-body { padding:36px;display:flex;flex-direction:column;justify-content:space-between;gap:20px; }
+
+.size-grid { display:flex;gap:8px;flex-wrap:wrap; }
+.size-btn { padding:8px 14px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);font-family:var(--font-mono);font-size:11px;cursor:pointer;transition:all .15s;letter-spacing:.1em; }
+.size-btn:hover { border-color:var(--ink);color:var(--ink); }
+.size-btn.selected { background:var(--accent);color:#000;border-color:var(--accent);font-weight:700; }
+
+.qty-row { display:flex;align-items:center;gap:16px;margin-bottom:16px; }
+.qty-row label { font-family:var(--font-mono);font-size:11px;color:var(--ink-3);letter-spacing:.2em; }
+
+.add-btn { width:100%;padding:18px;font-family:var(--font-head);font-size:14px;letter-spacing:.18em;text-transform:uppercase;background:var(--accent);color:#000;border:none;cursor:pointer;font-weight:700;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px; }
+.add-btn:hover { background:var(--ink); }
+.add-btn:disabled { background:var(--line);color:var(--ink-3);cursor:not-allowed; }
+
+.toast { position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#000;font-family:var(--font-head);font-size:13px;letter-spacing:.15em;padding:14px 28px;z-index:600;transition:transform .3s cubic-bezier(.2,.9,.2,1);white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ===== LIGHTBOX ===== */
+#lightbox { position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:700;display:none;place-items:center;cursor:zoom-out; }
+#lightbox.open { display:grid; }
+#lightbox img { max-width:88vw;max-height:88vh;object-fit:contain;border:1px solid var(--accent);box-shadow:0 0 80px color-mix(in oklab,var(--accent) 30%,transparent); }
+#lightbox .lb-close { position:absolute;top:20px;right:20px;width:44px;height:44px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;display:grid;place-items:center;cursor:pointer;transition:all .15s;z-index:1; }
+#lightbox .lb-close:hover { border-color:var(--accent);color:var(--accent); }
+#lightbox .lb-placeholder { width:min(560px,86vw);aspect-ratio:1;border:1px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:default; }
+.product-modal-visual { cursor:zoom-in; }
+
+/* ===== CHECKOUT ===== */
+#checkout-view { display:none;position:fixed;inset:0;background:var(--bg);z-index:600;overflow-y:auto; }
+
+@media(max-width:680px){
+  .product-modal-grid{grid-template-columns:1fr;}
+  .product-modal-visual{aspect-ratio:4/3;}
+  .product-modal-body{padding:20px;}
+  #cart-drawer{width:100vw;}
+}
+</style>
+</head><body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">e</span><span>espo<span style="color:var(--accent)">.</span></span></a>
+    <div class="nav-links">
+      <a href="index.html#live">LIVE</a><a href="index.html#members">MEMBERS</a><a href="index.html#trophies">TROPHIES</a><a href="index.html#media">MEDIA</a><a href="store.html" style="color:var(--accent)">GOODS</a>
+    </div>
+    <div class="nav-cta" style="display:flex;align-items:center;gap:12px;">
+      <div class="lang-toggle"><button class="on">JP</button><button>EN</button></div>
+      <button id="cart-btn" onclick="toggleCart()" style="position:relative;width:44px;height:44px;border:1px solid var(--line);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">
+        <svg style="pointer-events:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span id="cart-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--accent-2);color:#fff;font-family:var(--font-mono);font-size:10px;width:18px;height:18px;border-radius:50%;display:none;place-items:center;font-weight:700;">0</span>
+      </button>
+      <a href="audition.html" class="btn btn-solid">AUDITION →</a>
+    </div>
+  </div>
+</nav>
+<button class="back-btn" onclick="history.back()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  BACK
+</button>
+
+<!-- page hero -->
+<section style="padding:160px 32px 80px;max-width:1400px;margin:0 auto;border-bottom:1px solid var(--line);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 80% 30%,color-mix(in oklab,var(--accent-2) 15%,transparent),transparent 60%);pointer-events:none;"></div>
+  <div style="position:relative;">
+    <div class="page-kicker">OFFICIAL STORE / SS 2026</div>
+    <h1 class="page-title"><span class="accent">OFFICIAL</span><br><span class="stroke">STORE</span>.</h1>
+    <p class="page-sub">espo SS 2026コレクション — 数量限定あり。</p>
+    <div style="margin-top:20px;display:inline-block;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;padding:8px 16px;font-weight:700;">04.18 LAUNCH — LIMITED QTY</div>
+  </div>
+</section>
+
+<div class="page-body">
+  <div style="display:flex;gap:10px;margin-bottom:40px;flex-wrap:wrap;" id="filters">
+    <button class="btn btn-solid" onclick="filterGoods('ALL',this)">ALL</button><button class="btn" onclick="filterGoods('APPAREL',this)">APPAREL</button><button class="btn" onclick="filterGoods('ACCESSORIES',this)">ACCESSORIES</button><button class="btn" onclick="filterGoods('FIGURE',this)">FIGURE</button><button class="btn" onclick="filterGoods('PAPER',this)">PAPER</button><button class="btn" onclick="filterGoods('GOODS',this)">GOODS</button>
+  </div>
+  <div class="grid-4" id="goods-grid">
+    
+    <div class="card goods-card" data-tag="APPAREL" data-id="uniform-2026" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('uniform-2026')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/uniform.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">TEAM UNIFORM 2026</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥14,800</div>
+          <button onclick="event.stopPropagation();quickAdd('uniform-2026')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="APPAREL" data-id="jersey-2026" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('jersey-2026')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/jersey.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">TEAM JERSEY 2026</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥12,800</div>
+          <button onclick="event.stopPropagation();quickAdd('jersey-2026')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="ACCESSORIES" data-id="member-dogtag" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('member-dogtag')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/dogtag-nyx.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">ACCESSORIES</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">MEMBER DOG TAG SET</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥3,200</div>
+          <button onclick="event.stopPropagation();openProduct('member-dogtag')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="FIGURE" data-id="rubber-strap" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('rubber-strap')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;background:linear-gradient(135deg,#1a0a3a,#b33cff20);position:relative;overflow:hidden;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:12px;align-items:center;">
+        <img src="goods/rubber-nyx.jpg" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-shiroi.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-pippa.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-yume.jpg" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-zefir.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-kuroi.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-usagi.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <img src="goods/rubber-noko.png" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <div style="position:absolute;bottom:8px;right:8px;font-family:var(--font-mono);font-size:9px;color:#b33cff;letter-spacing:.1em;opacity:.7;">8 MEMBERS</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">FIGURE</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">RUBBER STRAP — メンバー選択</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥1,800</div>
+          <button onclick="event.stopPropagation();openProduct('rubber-strap')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="FIGURE" data-id="acrylic-nyx" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('acrylic-nyx')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent-2);color:#fff;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">LIMITED</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/acrylic-nyx.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">FIGURE</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">ACRYLIC STAND / NYX</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥2,400</div>
+          <button onclick="event.stopPropagation();quickAdd('acrylic-nyx')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="APPAREL" data-id="member-tee" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('member-tee')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/member-tee-nyx.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">MEMBER CHARACTER TEE</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥7,800</div>
+          <button onclick="event.stopPropagation();openProduct('member-tee')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="APPAREL" data-id="member-jacket" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('member-jacket')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/member-jacket-nyx.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">MEMBER TRACK JACKET</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥14,800</div>
+          <button onclick="event.stopPropagation();openProduct('member-jacket')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="APPAREL" data-id="logo-hoodie" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('logo-hoodie')">
+      
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="goods/logo-hoodie.png" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">LOGO HOODIE — BLACK</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥8,800</div>
+          <button onclick="event.stopPropagation();quickAdd('logo-hoodie')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="PAPER" data-id="sticker-vol3" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('sticker-vol3')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;background:linear-gradient(135deg,#3a2b0a 0%,color-mix(in oklab,#ff8e3c 30%,#3a2b0a));position:relative;overflow:hidden;display:grid;place-items:center;">
+        <div style="opacity:.12;position:absolute;inset:0;background:repeating-linear-gradient(135deg,#ff8e3c 0,#ff8e3c 1px,transparent 1px,transparent 12px);"></div>
+        <div style="font-family:var(--font-display);font-size:11px;color:#ff8e3c;letter-spacing:.2em;text-align:center;opacity:.5;">IMAGE<br>PLACEHOLDER</div>
+        <div style="position:absolute;bottom:10px;right:10px;font-family:var(--font-mono);font-size:9px;color:#ff8e3c;letter-spacing:.15em;opacity:.6;">PAPER</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">PAPER</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">STICKER SET VOL.3</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥980</div>
+          <button onclick="event.stopPropagation();quickAdd('sticker-vol3')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="GOODS" data-id="mug-logo" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('mug-logo')">
+      
+      <div style="aspect-ratio:1;background:linear-gradient(135deg,#0a1f3a 0%,color-mix(in oklab,#36f0ff 30%,#0a1f3a));position:relative;overflow:hidden;display:grid;place-items:center;">
+        <div style="opacity:.12;position:absolute;inset:0;background:repeating-linear-gradient(135deg,#36f0ff 0,#36f0ff 1px,transparent 1px,transparent 12px);"></div>
+        <div style="font-family:var(--font-display);font-size:11px;color:#36f0ff;letter-spacing:.2em;text-align:center;opacity:.5;">IMAGE<br>PLACEHOLDER</div>
+        <div style="position:absolute;bottom:10px;right:10px;font-family:var(--font-mono);font-size:9px;color:#36f0ff;letter-spacing:.15em;opacity:.6;">GOODS</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">GOODS</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">MUG CUP / espo LOGO</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥2,800</div>
+          <button onclick="event.stopPropagation();quickAdd('mug-logo')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="APPAREL" data-id="tote-ss26" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('tote-ss26')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e 0%,color-mix(in oklab,#ff3ea5 30%,#1a1a2e));position:relative;overflow:hidden;display:grid;place-items:center;">
+        <div style="opacity:.12;position:absolute;inset:0;background:repeating-linear-gradient(135deg,#ff3ea5 0,#ff3ea5 1px,transparent 1px,transparent 12px);"></div>
+        <div style="font-family:var(--font-display);font-size:11px;color:#ff3ea5;letter-spacing:.2em;text-align:center;opacity:.5;">IMAGE<br>PLACEHOLDER</div>
+        <div style="position:absolute;bottom:10px;right:10px;font-family:var(--font-mono);font-size:9px;color:#ff3ea5;letter-spacing:.15em;opacity:.6;">APPAREL</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">APPAREL</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">TOTE BAG SS26</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥3,200</div>
+          <button onclick="event.stopPropagation();quickAdd('tote-ss26')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="GOODS" data-id="mousepad-sq" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('mousepad-sq')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">NEW</div>
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/mousepad-sq-zefir.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">GOODS</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">SQUARE MOUSE PAD / ZEFIR</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥3,800</div>
+          <button onclick="event.stopPropagation();quickAdd('mousepad-sq')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="GOODS" data-id="mousepad-xl" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('mousepad-xl')">
+      
+      <div style="aspect-ratio:1;overflow:hidden;">
+        <img src="goods/mousepad-ginko.png" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">GOODS</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">MOUSE PAD XL / GINKO</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥4,500</div>
+          <button onclick="event.stopPropagation();quickAdd('mousepad-xl')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card goods-card" data-tag="FIGURE" data-id="keychain-set" style="padding:0;overflow:hidden;cursor:pointer;position:relative;transition:all .25s;" onclick="openProduct('keychain-set')">
+      <div style="position:absolute;top:12px;left:12px;z-index:2;background:var(--accent-2);color:#fff;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">LIMITED</div>
+      <div style="aspect-ratio:1;background:linear-gradient(135deg,#2b1a0a 0%,color-mix(in oklab,#f8d34a 30%,#2b1a0a));position:relative;overflow:hidden;display:grid;place-items:center;">
+        <div style="opacity:.12;position:absolute;inset:0;background:repeating-linear-gradient(135deg,#f8d34a 0,#f8d34a 1px,transparent 1px,transparent 12px);"></div>
+        <div style="font-family:var(--font-display);font-size:11px;color:#f8d34a;letter-spacing:.2em;text-align:center;opacity:.5;">IMAGE<br>PLACEHOLDER</div>
+        <div style="position:absolute;bottom:10px;right:10px;font-family:var(--font-mono);font-size:9px;color:#f8d34a;letter-spacing:.15em;opacity:.6;">FIGURE</div>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.15em;margin-bottom:6px;">FIGURE</div>
+        <h3 style="font-family:var(--font-head);font-size:15px;margin:0 0 8px;letter-spacing:.05em;">ACRYLIC KEYCHAIN SET</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--font-display);font-size:22px;color:var(--accent-2);font-weight:900;">¥3,600</div>
+          <button onclick="event.stopPropagation();quickAdd('keychain-set')" style="width:32px;height:32px;background:var(--accent);border:none;cursor:pointer;display:grid;place-items:center;transition:all .15s;" onmouseover="this.style.background='var(--ink)'" onmouseout="this.style.background='var(--accent)'">
+            <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <div id="lb-content"></div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="product-overlay" onclick="closeProduct()">
+  <div id="product-modal" onclick="event.stopPropagation()">
+    <button onclick="closeProduct()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;background:var(--bg);border:1px solid var(--line);color:var(--ink);font-size:16px;cursor:pointer;z-index:2;display:grid;place-items:center;">✕</button>
+    <div class="product-modal-grid">
+      <div class="product-modal-visual" id="pm-visual"></div>
+      <div class="product-modal-body">
+        <div>
+          <div id="pm-badge" style="margin-bottom:10px;"></div>
+          <div id="pm-tag" style="font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:.2em;margin-bottom:8px;"></div>
+          <h2 id="pm-name" style="font-family:var(--font-display);font-size:clamp(20px,3vw,32px);margin:0 0 10px;text-transform:uppercase;"></h2>
+          <p id="pm-desc" style="color:var(--ink-2);font-size:13px;line-height:1.7;margin:0 0 16px;"></p>
+          <div id="pm-price" style="font-family:var(--font-display);font-size:36px;color:var(--accent-2);font-weight:900;margin-bottom:20px;"></div>
+          <div id="pm-sizes-wrap" style="margin-bottom:20px;">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.2em;margin-bottom:10px;">SIZE</div>
+            <div class="size-grid" id="pm-sizes"></div>
+            <div id="pm-size-err" style="font-family:var(--font-mono);font-size:10px;color:#ff4646;letter-spacing:.15em;margin-top:6px;display:none;">サイズを選択してください</div>
+          </div>
+          <div id="pm-member-wrap" style="margin-bottom:20px;display:none;">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);letter-spacing:.2em;margin-bottom:10px;">MEMBER / キャラクターを選択</div>
+            <div id="pm-member-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+            <div id="pm-member-err" style="font-family:var(--font-mono);font-size:10px;color:#ff4646;letter-spacing:.15em;margin-top:6px;display:none;">メンバーを選択してください</div>
+          </div>
+          <div class="qty-row">
+            <label>QTY</label>
+            <div class="qty-ctrl">
+              <button onclick="pmQty(-1)">−</button>
+              <span id="pm-qty">1</span>
+              <button onclick="pmQty(1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <button class="add-btn" onclick="addFromModal()">カートに追加 <svg style="pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+          <button onclick="closeProduct();toggleCart();" style="width:100%;margin-top:10px;padding:14px;font-family:var(--font-head);font-size:13px;letter-spacing:.15em;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;transition:all .2s;text-transform:uppercase;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--line)'">カートを見る</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-drawer" style="pointer-events:none;">
+  <div class="cart-head">
+    <div><h2>CART</h2><div class="count" id="cart-count-label">0 ITEMS</div></div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-summary">
+      <div class="cart-row"><span>小計</span><span id="subtotal-val">¥0</span></div>
+      <div class="cart-row"><span>消費税 (10%)</span><span id="tax-val">¥0</span></div>
+      <div class="cart-row"><span>送料</span><span>¥550〜</span></div>
+      <div class="cart-row total"><span>合計</span><span id="total-val">¥0</span></div>
+    </div>
+    <button onclick="goCheckout()" style="width:100%;padding:18px;background:var(--accent-2);color:#fff;border:none;cursor:pointer;font-family:var(--font-head);font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;transition:all .2s;margin-bottom:10px;" onmouseover="this.style.background='var(--ink)';this.style.color='#000'" onmouseout="this.style.background='var(--accent-2)';this.style.color='#fff'">レジへ進む →</button>
+    <button onclick="clearCart()" style="width:100%;padding:12px;background:transparent;color:var(--ink-3);border:1px solid var(--line);cursor:pointer;font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;transition:all .2s;" onmouseover="this.style.color='#ff4646';this.style.borderColor='#ff4646'" onmouseout="this.style.color='var(--ink-3)';this.style.borderColor='var(--line)'">カートを空にする</button>
+  </div>
+</div>
+
+<!-- CHECKOUT VIEW -->
+<div id="checkout-view">
+  <div style="max-width:960px;margin:0 auto;padding:80px 32px;">
+    <button onclick="closeCheckout()" style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);letter-spacing:.2em;background:none;border:none;cursor:pointer;margin-bottom:40px;display:flex;align-items:center;gap:8px;">← ショッピングに戻る</button>
+    <div id="checkout-content">
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:start;" id="checkout-main">
+        <div>
+          <h1 style="font-family:var(--font-display);font-size:48px;text-transform:uppercase;margin:0 0 40px;">CHECKOUT.</h1>
+          <!-- contact -->
+          <div style="margin-bottom:32px;">
+            <h3 style="font-family:var(--font-head);letter-spacing:.15em;margin:0 0 20px;font-size:18px;">連絡先情報</h3>
+            <div class="form-group"><label>メールアドレス</label><input type="email" placeholder="example@email.com"></div>
+          </div>
+          <!-- shipping -->
+          <div style="margin-bottom:32px;">
+            <h3 style="font-family:var(--font-head);letter-spacing:.15em;margin:0 0 20px;font-size:18px;">配送先</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="form-group"><label>姓</label><input type="text" placeholder="山田"></div>
+              <div class="form-group"><label>名</label><input type="text" placeholder="太郎"></div>
+            </div>
+            <div class="form-group"><label>郵便番号</label><input type="text" placeholder="000-0000" style="max-width:200px;"></div>
+            <div class="form-group"><label>都道府県</label><input type="text" placeholder="東京都"></div>
+            <div class="form-group"><label>市区町村・番地</label><input type="text" placeholder="〇〇区〇〇 1-1-1"></div>
+            <div class="form-group"><label>建物名・部屋番号（任意）</label><input type="text" placeholder="espoビル 101"></div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+              
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-mono);font-size:12px;padding:12px 16px;border:1px solid var(--line);flex:1;transition:all .15s;" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='var(--line)');this.style.borderColor='var(--accent)'">
+                <input type="radio" name="ship" checked style="accent-color:var(--accent);width:auto;"> 通常配送 ¥550
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-mono);font-size:12px;padding:12px 16px;border:1px solid var(--line);flex:1;transition:all .15s;" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='var(--line)');this.style.borderColor='var(--accent)'">
+                <input type="radio" name="ship"  style="accent-color:var(--accent);width:auto;"> 速達 ¥1,100
+              </label>
+            </div>
+          </div>
+          <!-- payment -->
+          <div>
+            <h3 style="font-family:var(--font-head);letter-spacing:.15em;margin:0 0 20px;font-size:18px;">支払い方法</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+              
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-mono);font-size:11px;padding:10px 16px;border:1px solid var(--accent);transition:all .15s;" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='var(--line)');this.style.borderColor='var(--accent)'">
+                <input type="radio" name="pay" checked style="accent-color:var(--accent);width:auto;"> クレジットカード
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-mono);font-size:11px;padding:10px 16px;border:1px solid var(--line);transition:all .15s;" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='var(--line)');this.style.borderColor='var(--accent)'">
+                <input type="radio" name="pay"  style="accent-color:var(--accent);width:auto;"> コンビニ払い
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--font-mono);font-size:11px;padding:10px 16px;border:1px solid var(--line);transition:all .15s;" onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.borderColor='var(--line)');this.style.borderColor='var(--accent)'">
+                <input type="radio" name="pay"  style="accent-color:var(--accent);width:auto;"> 銀行振込
+              </label>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <div class="form-group"><label>カード番号</label><input type="text" placeholder="0000 0000 0000 0000"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group"><label>有効期限</label><input type="text" placeholder="MM / YY"></div>
+                <div class="form-group"><label>セキュリティコード</label><input type="text" placeholder="CVV"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- order summary -->
+        <div>
+          <div style="background:var(--panel);border:1px solid var(--line);padding:24px;position:sticky;top:100px;">
+            <h3 style="font-family:var(--font-head);letter-spacing:.15em;margin:0 0 20px;font-size:16px;">注文内容</h3>
+            <div id="checkout-items" style="margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:16px;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-family:var(--font-mono);font-size:12px;margin-bottom:20px;">
+              <div style="display:flex;justify-content:space-between;color:var(--ink-2);"><span>小計</span><span id="co-subtotal"></span></div>
+              <div style="display:flex;justify-content:space-between;color:var(--ink-2);"><span>消費税 (10%)</span><span id="co-tax"></span></div>
+              <div style="display:flex;justify-content:space-between;color:var(--ink-2);"><span>送料</span><span>¥550</span></div>
+              <div style="display:flex;justify-content:space-between;font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--ink);padding-top:12px;border-top:1px solid var(--line);"><span>合計</span><span id="co-total" style="color:var(--accent-2);"></span></div>
+            </div>
+            <button onclick="placeOrder()" style="width:100%;padding:18px;background:var(--accent-2);color:#fff;border:none;cursor:pointer;font-family:var(--font-head);font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;">注文を確定する →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">カートに追加しました</div>
+
+<footer class="foot"><div class="foot-top"><div><div class="foot-big"><span class="stroke">FOR</span> <span class="accent">THE</span><br><span class="accent">CROWN</span>.</div><div class="foot-caption">espo — VIRTUAL ESPORTS PROJECT © 2026</div></div><div class="foot-col"><h5>SITE</h5><ul><li><a href="about.html">ABOUT</a></li><li><a href="index.html#members">MEMBERS</a></li><li><a href="index.html#trophies">TROPHIES</a></li><li><a href="index.html#media">MEDIA</a></li></ul></div><div class="foot-col"><h5>SUPPORT</h5><ul><li><a href="fanclub.html">FAN CLUB</a></li><li><a href="store.html">STORE</a></li><li><a href="guidelines.html">GUIDELINES</a></li><li><a href="faq.html">FAQ</a></li></ul></div><div class="foot-col"><h5>COMPANY</h5><ul><li><a href="corporate.html">CORPORATE</a></li><li><a href="careers.html">CAREERS</a></li><li><a href="contact.html">CONTACT</a></li><li><a href="press.html">PRESS</a></li></ul></div></div><div class="foot-bot"><div>© 2026 espo. ALL RIGHTS RESERVED. — 架空のブランドです。</div></div></footer>
+
+<script>
+const GOODS_DATA = [{"id":"jersey-2026","name":"TEAM JERSEY 2026","price":12800,"tag":"APPAREL","colors":["#0a1f3a","#36f0ff"],"desc":"オフィシャルチームジャージ。速乾素材・バックプリント入り。XS〜3XL。","badge":"NEW","hasSizes":true,"img":"goods/jersey.png"},{"id":"uniform-2026","name":"TEAM UNIFORM 2026","price":14800,"tag":"APPAREL","colors":["#0a3a3a","#36f0ff"],"desc":"オフィシャルチームユニフォーム。試合用速乾素材。胸元にespoロゴ入り。XS〜3XL。","badge":"NEW","hasSizes":true,"img":"goods/uniform.png"},{"id":"acrylic-nyx","name":"ACRYLIC STAND / NYX","price":2400,"tag":"FIGURE","colors":["#2b1055","#7597de"],"desc":"NYX アクリルスタンド。高さ約18cm。ランダム台座付き。","badge":"LIMITED","hasSizes":false,"img":"goods/acrylic-nyx.png"},{"id":"logo-hoodie","name":"LOGO HOODIE — BLACK","price":8800,"tag":"APPAREL","colors":["#0a0a1a","#ff3ea5"],"desc":"ビッグロゴプリントパーカー。裏起毛。S〜XXL。","badge":"","hasSizes":true,"img":"goods/logo-hoodie.png"},{"id":"sticker-vol3","name":"STICKER SET VOL.3","price":980,"tag":"PAPER","colors":["#3a2b0a","#ff8e3c"],"desc":"全20メンバーステッカーセット。防水仕様。","badge":"NEW","hasSizes":false,"img":null},{"id":"mug-logo","name":"MUG CUP / espo LOGO","price":2800,"tag":"GOODS","colors":["#0a1f3a","#36f0ff"],"desc":"espoロゴ入りマグカップ。食洗機対応。","badge":"","hasSizes":false,"img":null},{"id":"tote-ss26","name":"TOTE BAG SS26","price":3200,"tag":"APPAREL","colors":["#1a1a2e","#ff3ea5"],"desc":"SS2026コレクション トートバッグ。A4サイズ対応。","badge":"NEW","hasSizes":false,"img":null},{"id":"mousepad-xl","name":"MOUSE PAD XL / GINKO","price":4500,"tag":"GOODS","colors":["#0a0a1a","#36f0ff"],"desc":"大判マウスパッド900×400mm。滑り止め加工。","badge":"","hasSizes":false,"img":"goods/mousepad-ginko.png"},{"id":"keychain-set","name":"ACRYLIC KEYCHAIN SET","price":3600,"tag":"FIGURE","colors":["#2b1a0a","#f8d34a"],"desc":"メンバーキーホルダー4個セット。ランダム封入。","badge":"LIMITED","hasSizes":false,"img":null},{"id":"rubber-strap","name":"RUBBER STRAP — メンバー選択","price":1800,"tag":"FIGURE","colors":["#1a0a3a","#b33cff"],"desc":"メンバーを選んで注文できるラバーストラップ。キーホルダーリング付き。約6cm。全9種展開（順次追加予定）。","badge":"NEW","hasSizes":false,"hasMember":true,"img":null,"members":[{"id":"nyx","name":"NYX","jp":"ニクス","img":"goods/rubber-nyx.jpg"},{"id":"shiroi","name":"SHIROI","jp":"シロイ","img":"goods/rubber-shiroi.png"},{"id":"pippa","name":"PIPPA","jp":"ピッパ","img":"goods/rubber-pippa.png"},{"id":"yume","name":"YUME","jp":"ユメ","img":"goods/rubber-yume.jpg"},{"id":"noko","name":"NOKO","jp":"ノコ","img":"goods/rubber-noko.png"},{"id":"zefir","name":"ZEFIR","jp":"ゼフィール","img":"goods/rubber-zefir.png"},{"id":"kuroi","name":"KUROI","jp":"クロイ","img":"goods/rubber-kuroi.png"},{"id":"usagi","name":"USAGI","jp":"ウサギ","img":"goods/rubber-usagi.png"}]},{"id":"member-jacket","name":"MEMBER TRACK JACKET","price":14800,"tag":"APPAREL","colors":["#0a1f3a","#36f0ff"],"desc":"メンバーモチーフのトラックジャケット。背面にメンバー名＆ナンバー、サイドラインがメンバーカラー。XS〜3XL。順次追加予定。","badge":"NEW","hasSizes":true,"hasMember":true,"img":null,"members":[{"id":"nyx","name":"NYX","jp":"ニクス","img":"goods/member-jacket-nyx.png"}]},{"id":"mousepad-sq","name":"SQUARE MOUSE PAD / ZEFIR","price":3800,"tag":"GOODS","colors":["#2b0a3a","#b33cff"],"desc":"ZEFIRモチーフの正方形マウスパッド。400×400mm、厚さ4mm。滑り止め加工。","badge":"NEW","hasSizes":false,"hasMember":false,"img":"goods/mousepad-sq-zefir.png"},{"id":"member-tee","name":"MEMBER CHARACTER TEE","price":7800,"tag":"APPAREL","colors":["#0a0a14","#36f0ff"],"desc":"メンバーキャラクタープリントTシャツ。暗所でHUD/ネオンプリントが発光。オーバーサイズ。XS〜3XL。順次追加予定。","badge":"NEW","hasSizes":true,"hasMember":true,"img":null,"members":[{"id":"nyx","name":"NYX","jp":"ニクス","img":"goods/member-tee-nyx.png"}]},{"id":"member-dogtag","name":"MEMBER DOG TAG SET","price":3200,"tag":"ACCESSORIES","colors":["#1a1a1a","#c0c0c0"],"desc":"メンバーモチーフのドッグタグ2枚セット。シルバー＋ブラックPVDコーティング。メンバーのK/D・ロール・ナンバーを刻印。ボールチェーン付き。","badge":"NEW","hasSizes":false,"hasMember":true,"img":null,"members":[{"id":"nyx","name":"NYX","jp":"ニクス","img":"goods/dogtag-nyx.png"}]}];
+let cart = JSON.parse(localStorage.getItem('espo-cart')||'[]');
+let currentProduct = null;
+let pmSelectedSize = null;
+let pmSelectedMember = null;
+let pmQtyVal = 1;
+
+// ---- FILTER ----
+function filterGoods(tag, btn) {
+  document.querySelectorAll('#filters .btn').forEach(b => { b.classList.remove('btn-solid'); });
+  btn.classList.add('btn-solid');
+  document.querySelectorAll('.goods-card').forEach(c => {
+    c.style.display = (tag === 'ALL' || c.dataset.tag === tag) ? '' : 'none';
+  });
+}
+
+// ---- CART HELPERS ----
+function saveCart() { localStorage.setItem('espo-cart', JSON.stringify(cart)); }
+function updateBadge() {
+  const total = cart.reduce((a,b)=>a+b.qty,0);
+  const badge = document.getElementById('cart-badge');
+  if (total > 0) { badge.textContent = total; badge.style.display = 'grid'; }
+  else { badge.style.display = 'none'; }
+}
+function formatYen(n) { return '¥' + Math.round(n).toLocaleString(); }
+function calcSubtotal() { return cart.reduce((a,b)=>a+(b.price*b.qty),0); }
+
+// ---- RENDER CART ---- (pure innerHTML, no DOM node dependencies)
+function renderCart() {
+  const list = document.getElementById('cart-items-list');
+  const footer = document.getElementById('cart-footer');
+  const subtotal = calcSubtotal();
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax + 550;
+
+  if (cart.length === 0) {
+    footer.style.display = 'none';
+    list.innerHTML = `<div class="cart-empty">
+      <div class="big">🛒</div>
+      <div style="font-family:var(--font-head);letter-spacing:.1em;">カートは空です</div>
+      <a href="#" onclick="closeCart();return false;" style="font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:.2em;">ショッピングを続ける →</a>
+    </div>`;
+  } else {
+    footer.style.display = 'block';
+    document.getElementById('subtotal-val').textContent = formatYen(subtotal);
+    document.getElementById('tax-val').textContent = formatYen(tax);
+    document.getElementById('total-val').textContent = formatYen(total);
+    document.getElementById('cart-count-label').textContent = cart.reduce((a,b)=>a+b.qty,0) + ' ITEMS';
+    list.innerHTML = cart.map((item,i) => {
+      const g = GOODS_DATA.find(x=>x.id===item.id);
+      return `<div class="cart-item">
+        <div class="cart-item-img" style="background:linear-gradient(135deg,${g.colors[0]},${g.colors[1]}30);">
+          <div style="font-family:var(--font-mono);font-size:8px;color:${g.colors[1]};opacity:.5;text-align:center;padding:4px;">IMG</div>
+        </div>
+        <div>
+          <div class="cart-item-name">${item.name}</div>
+          ${item.size?'<div class="cart-item-variant">SIZE: '+item.size+'</div>':''}
+          <div class="qty-ctrl" style="margin-top:8px;">
+            <button onclick="changeQty(${i},-1)">−</button>
+            <span>${item.qty}</span>
+            <button onclick="changeQty(${i},1)">+</button>
+          </div>
+          <button class="remove-btn" onclick="removeItem(${i})">削除する</button>
+        </div>
+        <div class="cart-item-price">${formatYen(item.price*item.qty)}</div>
+      </div>`;
+    }).join('');
+  }
+  updateBadge();
+}
+
+function changeQty(i, d) {
+  cart[i].qty += d;
+  if (cart[i].qty <= 0) cart.splice(i,1);
+  saveCart(); renderCart();
+}
+function removeItem(i) { cart.splice(i,1); saveCart(); renderCart(); }
+function clearCart() { cart=[]; saveCart(); renderCart(); }
+
+// ---- CART OPEN/CLOSE ----
+function toggleCart() {
+  const d = document.getElementById('cart-drawer');
+  d.classList.contains('open') ? closeCart() : openCart();
+}
+function openCart() {
+  const drawer = document.getElementById('cart-drawer');
+  drawer.style.pointerEvents = '';
+  renderCart();
+  drawer.classList.add('open');
+  document.getElementById('cart-overlay').classList.add('open');
+}
+function closeCart() {
+  const drawer = document.getElementById('cart-drawer');
+  const overlay = document.getElementById('cart-overlay');
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  // Prevent closed (off-screen) drawer from intercepting clicks
+  setTimeout(() => { drawer.style.pointerEvents = 'none'; }, 350);
+}
+
+// ---- TOAST ----
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ---- LIGHTBOX ----
+function openLightbox(src, colors, name) {
+  const lb = document.getElementById('lightbox');
+  const content = document.getElementById('lb-content');
+  if (src) {
+    content.innerHTML = `<img src="${src}" alt="${name}" onclick="event.stopPropagation()">`;
+  } else {
+    // placeholder — styled block
+    content.innerHTML = `<div class="lb-placeholder" onclick="event.stopPropagation()" style="background:linear-gradient(135deg,${colors[0]},${colors[1]}20);">
+      <div style="opacity:.15;position:absolute;inset:0;background:repeating-linear-gradient(135deg,${colors[1]} 0,${colors[1]} 1px,transparent 1px,transparent 12px);border-radius:0;"></div>
+      <svg style="pointer-events:none;opacity:.3;" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="${colors[1]}" stroke-width="1"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <div style="font-family:var(--font-mono);font-size:12px;color:${colors[1]};letter-spacing:.2em;opacity:.5;">IMAGE PLACEHOLDER</div>
+      <div style="font-family:var(--font-head);font-size:18px;letter-spacing:.1em;color:var(--ink);margin-top:8px;">${name}</div>
+    </div>`;
+  }
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeProduct(); } });
+
+// ---- PRODUCT MODAL ----
+function openProduct(id) {
+  const g = GOODS_DATA.find(x=>x.id===id);
+  if (!g) return;
+  currentProduct = g;
+  pmSelectedSize = null;
+  pmSelectedMember = null;
+  pmQtyVal = 1;
+
+  // visual
+  const visual = document.getElementById('pm-visual');
+  if (g.img) {
+    visual.style.background = '#111';
+    visual.innerHTML = `<img src="${g.img}" style="width:100%;height:100%;object-fit:contain;display:block;padding:16px;">`;
+  } else if (g.hasMember && g.members?.length) {
+    // Show first member image as default
+    const first = g.members[0];
+    visual.style.background = `linear-gradient(135deg,${g.colors[0]},${g.colors[1]}30)`;
+    visual.innerHTML = `<img id="pm-member-preview" src="${first.img}" style="width:100%;height:100%;object-fit:contain;display:block;padding:16px;">`;
+  } else {
+    visual.style.background = `linear-gradient(135deg,${g.colors[0]},${g.colors[1]}30)`;
+    visual.innerHTML = `<div style="opacity:.12;position:absolute;inset:0;background:repeating-linear-gradient(135deg,${g.colors[1]} 0,${g.colors[1]} 1px,transparent 1px,transparent 12px);"></div>
+    <div style="font-family:var(--font-mono);font-size:11px;color:${g.colors[1]};text-align:center;opacity:.4;z-index:1;">IMAGE<br>PLACEHOLDER</div>`;
+  }
+  visual.onclick = () => openLightbox(
+    g.img || (pmSelectedMember?.img) || (g.members?.[0]?.img) || null,
+    g.colors, g.name
+  );
+
+  document.getElementById('pm-tag').textContent = g.tag;
+  document.getElementById('pm-name').textContent = g.name;
+  document.getElementById('pm-desc').textContent = g.desc;
+  document.getElementById('pm-price').textContent = '¥' + g.price.toLocaleString();
+  document.getElementById('pm-qty').textContent = 1;
+
+  // sizes
+  const sizesWrap = document.getElementById('pm-sizes-wrap');
+  const sizesEl = document.getElementById('pm-sizes');
+  if (g.hasSizes) {
+    sizesWrap.style.display = 'block';
+    sizesEl.innerHTML = ['XS','S','M','L','XL','XXL'].map(s=>
+      `<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`
+    ).join('');
+  } else {
+    sizesWrap.style.display = 'none';
+  }
+
+  // members
+  const memberWrap = document.getElementById('pm-member-wrap');
+  const memberGrid = document.getElementById('pm-member-grid');
+  if (g.hasMember && g.members?.length) {
+    memberWrap.style.display = 'block';
+    memberGrid.innerHTML = g.members.map(m => `
+      <button class="member-sel-btn" data-id="${m.id}" onclick="selectMember('${m.id}',this)" style="
+        border:1px solid var(--line);background:var(--bg);padding:6px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;
+      " onmouseover="this.style.borderColor='var(--accent)'" onmouseout="if(!this.classList.contains('selected'))this.style.borderColor='var(--line)'">
+        <img src="${m.img}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--ink-3);letter-spacing:.1em;">${m.name}</div>
+        <div style="font-family:var(--font-body);font-size:9px;color:var(--ink-3);">${m.jp}</div>
+      </button>
+    `).join('');
+  } else {
+    memberWrap.style.display = 'none';
+  }
+
+  const badge = document.getElementById('pm-badge');
+  badge.innerHTML = g.badge ? `<span style="background:${g.badge==='LIMITED'?'var(--accent-2)':'var(--accent)'};color:${g.badge==='LIMITED'?'#fff':'#000'};font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;padding:3px 8px;">${g.badge}</span>` : '';
+
+  document.getElementById('product-overlay').classList.add('open');
+}
+function closeProduct() { document.getElementById('product-overlay').classList.remove('open'); }
+function selectSize(s, btn) {
+  pmSelectedSize = s;
+  document.querySelectorAll('#pm-sizes .size-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('pm-size-err').style.display = 'none';
+}
+function pmQty(d) {
+  pmQtyVal = Math.max(1, pmQtyVal + d);
+  document.getElementById('pm-qty').textContent = pmQtyVal;
+}
+function selectMember(id, btn) {
+  const g = currentProduct;
+  pmSelectedMember = g.members.find(m => m.id === id);
+  document.querySelectorAll('.member-sel-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.borderColor = 'var(--line)';
+    b.style.background = 'var(--bg)';
+  });
+  btn.classList.add('selected');
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.background = 'var(--panel)';
+  // Update preview image
+  const preview = document.getElementById('pm-member-preview');
+  if (preview && pmSelectedMember) preview.src = pmSelectedMember.img;
+  document.getElementById('pm-member-err').style.display = 'none';
+  // Update lightbox target
+  document.getElementById('pm-visual').onclick = () => openLightbox(pmSelectedMember.img, g.colors, g.name + ' / ' + pmSelectedMember.name);
+}
+function addFromModal() {
+  if (!currentProduct) return;
+  if (currentProduct.hasSizes && !pmSelectedSize) {
+    document.getElementById('pm-size-err').style.display = 'block';
+    return;
+  }
+  if (currentProduct.hasMember && !pmSelectedMember) {
+    document.getElementById('pm-member-err').style.display = 'block';
+    return;
+  }
+  const variant = pmSelectedMember ? pmSelectedMember.name : pmSelectedSize;
+  addToCart(currentProduct, variant, pmQtyVal);
+  closeProduct();
+}
+
+// ---- QUICK ADD (no size required) ----
+function quickAdd(id) {
+  const g = GOODS_DATA.find(x=>x.id===id);
+  if (!g) return;
+  if (g.hasSizes) { openProduct(id); return; }
+  addToCart(g, null, 1);
+}
+
+// ---- ADD TO CART ----
+function addToCart(g, size, qty) {
+  const key = g.id + (size?'-'+size:'');
+  const existing = cart.find(x=>x.key===key);
+  if (existing) { existing.qty += qty; }
+  else { cart.push({ key, id:g.id, name:g.name, price:g.price, size, qty }); }
+  saveCart();
+  updateBadge();
+  // Always restore pointer-events so drawer stays interactive
+  document.getElementById('cart-drawer').style.pointerEvents = '';
+  // Only re-render if drawer is currently open
+  if (document.getElementById('cart-drawer').classList.contains('open')) {
+    renderCart();
+  }
+  showToast(g.name + ' をカートに追加しました');
+}
+
+// ---- CHECKOUT ----
+function goCheckout() {
+  closeCart();
+  const subtotal = calcSubtotal();
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax + 550;
+  document.getElementById('co-subtotal').textContent = formatYen(subtotal);
+  document.getElementById('co-tax').textContent = formatYen(tax);
+  document.getElementById('co-total').textContent = formatYen(total);
+
+  document.getElementById('checkout-items').innerHTML = cart.map(item=>{
+    const g = GOODS_DATA.find(x=>x.id===item.id);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,${g.colors[0]},${g.colors[1]}30);flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-family:var(--font-head);font-size:13px;letter-spacing:.05em;">${item.name}</div>
+        ${item.size?'<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);">SIZE: '+item.size+'</div>':''}
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);">× ${item.qty}</div>
+      </div>
+      <div style="font-family:var(--font-display);font-size:16px;color:var(--accent-2);">${formatYen(item.price*item.qty)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('checkout-view').style.display = 'block';
+  window.scrollTo(0,0);
+}
+function closeCheckout() {
+  document.getElementById('checkout-view').style.display = 'none';
+}
+function placeOrder() {
+  document.getElementById('checkout-main').innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:80px 0;">
+      <div style="font-family:var(--font-display);font-size:80px;color:var(--accent);margin-bottom:24px;">ORDER<br>COMPLETE.</div>
+      <p style="color:var(--ink-2);font-size:16px;line-height:1.8;margin-bottom:32px;">ご注文ありがとうございます！<br>確認メールをお送りしました。発送まで3〜5営業日ほどお待ちください。</p>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-3);letter-spacing:.2em;margin-bottom:32px;">ORDER NO. #${Math.floor(Math.random()*900000+100000)}</div>
+      <a href="store.html" onclick="cart=[];saveCart();updateBadge();" class="btn btn-solid" style="padding:18px 40px;font-size:14px;">ショッピングを続ける →</a>
+    </div>
+  `;
+  cart = []; saveCart(); updateBadge();
+}
+
+// init
+updateBadge();
+</script>
+</body></html>

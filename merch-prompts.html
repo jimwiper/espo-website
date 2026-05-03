@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>espo — Merchandise Prompt Bible</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Anton&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070914; --bg2: #0d1124; --panel: #11162d;
+  --ink: #eef1ff; --ink2: #a9b0d6; --ink3: #6d73a0;
+  --line: #1e2448;
+  --accent: #36f0ff; --mag: #ff3ea5; --gold: #f8d34a;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP",sans-serif;-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);z-index:100;mix-blend-mode:overlay;}
+
+header{padding:48px 40px 32px;border-bottom:1px solid var(--line);max-width:1400px;margin:0 auto;}
+.logo{font-family:"Zen Dots",sans-serif;font-size:28px;color:var(--accent);letter-spacing:.04em;margin:0 0 8px;}
+.logo span{color:var(--ink);}
+.header-sub{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink3);letter-spacing:.25em;}
+
+.wrap{max-width:1400px;margin:0 auto;padding:48px 40px 120px;}
+
+.intro{background:var(--bg2);border:1px solid var(--line);padding:28px 32px;margin-bottom:48px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+.intro-item{border-left:2px solid var(--accent);padding-left:16px;}
+.intro-item h4{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--accent);letter-spacing:.25em;margin:0 0 6px;}
+.intro-item p{font-size:13px;color:var(--ink2);margin:0;line-height:1.6;}
+
+.section-label{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent);letter-spacing:.3em;margin:0 0 16px;display:flex;align-items:center;gap:12px;}
+.section-label::before{content:"";width:28px;height:1px;background:var(--accent);}
+h2{font-family:"Zen Dots",sans-serif;font-size:clamp(28px,4vw,52px);margin:0 0 40px;line-height:.9;text-transform:uppercase;}
+h2 .s{-webkit-text-stroke:1.5px var(--ink);color:transparent;}
+h2 .a{color:var(--accent);}
+h2 .m{color:var(--mag);}
+
+.item-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:64px;}
+.item-card{background:var(--panel);border:1px solid var(--line);overflow:hidden;transition:border-color .2s;}
+.item-card:hover{border-color:var(--accent);}
+.item-card.featured{grid-column:span 2;}
+
+.item-head{padding:24px 28px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.item-no{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink3);letter-spacing:.2em;}
+.item-name{font-family:"Anton",sans-serif;font-size:22px;letter-spacing:.06em;text-transform:uppercase;margin:4px 0 0;}
+.item-tag{font-family:"JetBrains Mono",monospace;font-size:10px;padding:3px 8px;border:1px solid;letter-spacing:.15em;white-space:nowrap;}
+.tag-new{border-color:var(--accent);color:var(--accent);}
+.tag-member{border-color:var(--mag);color:var(--mag);}
+.tag-collab{border-color:var(--gold);color:var(--gold);}
+
+.item-body{padding:24px 28px;}
+.item-concept{font-size:13px;color:var(--ink2);line-height:1.7;margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid var(--line);}
+.item-concept strong{color:var(--ink);}
+
+.why{margin-bottom:20px;}
+.why-label{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--gold);letter-spacing:.2em;margin-bottom:8px;}
+.why p{font-size:12px;color:var(--ink2);margin:0;line-height:1.6;}
+
+.prompt-block{background:var(--bg);border:1px solid var(--line);padding:16px 20px;position:relative;}
+.prompt-label{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--accent);letter-spacing:.2em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.copy-btn{background:none;border:1px solid var(--line);color:var(--ink2);font-family:"JetBrains Mono",monospace;font-size:10px;padding:4px 10px;cursor:pointer;letter-spacing:.1em;transition:all .15s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+.prompt-text{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink2);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;}
+.neg{color:var(--ink3);}
+.param{color:var(--gold);}
+
+.member-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.chip{font-family:"JetBrains Mono",monospace;font-size:10px;padding:3px 8px;border:1px solid var(--line);color:var(--ink3);letter-spacing:.1em;}
+.chip.active{background:var(--mag);color:#fff;border-color:var(--mag);}
+
+.divider{height:1px;background:var(--line);margin:48px 0;}
+
+@media(max-width:900px){
+  .item-grid{grid-template-columns:1fr;}
+  .item-card.featured{grid-column:auto;}
+  .intro{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">espo<span>.</span> MERCH PROMPT BIBLE</div>
+  <div class="header-sub">// MERCHANDISE IMAGE-GEN PROMPTS — DIFFERENTIATOR STRATEGY — 2026</div>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    <div class="intro-item">
+      <h4>COMPETITOR GAP</h4>
+      <p>VSPOはオーロラ・パステル・ホログラフィック・アイドル路線。espoは<strong>ダーク×ネオン×タクティカル×ストリートウェア</strong>で真逆を攻める。</p>
+    </div>
+    <div class="intro-item">
+      <h4>ESPO AESTHETIC DNA</h4>
+      <p>Navy #070914 × Cyan #36f0ff × Magenta #ff3ea5。クロスヘア・HUD・レーダー・軍事モチーフ。「ゲームで勝つ女」のビジュアル言語。</p>
+    </div>
+    <div class="intro-item">
+      <h4>DIFFERENTIATOR KEYWORDS</h4>
+      <p>UV-reactive ink / Glitch art / Tactical coloring / Data HUD aesthetic / Member-number system / Reversible construction / Anti-idol</p>
+    </div>
+  </div>
+
+  <!-- ===== CATEGORY 01: APPAREL ===== -->
+  <div class="section-label">01 / APPAREL</div>
+  <h2><span class="s">WEAR</span> THE <span class="a">CREW</span>.</h2>
+
+  <div class="item-grid">
+
+    <!-- UV Tee -->
+    <div class="item-card featured">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 01 — APPAREL</div>
+          <div class="item-name">UV REACTIVE BLACKOUT TEE — メンバー別</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span class="item-tag tag-new">CONCEPT</span>
+          <span class="item-tag tag-member">MEMBER VARIANT</span>
+        </div>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          通常光では<strong>完全ブラックのシンプルなTシャツ</strong>に見える。UV（ブラック）ライトを当てると<strong>キャラクターのグリッチアートとHUDエレメント</strong>が浮かび上がる。メンバー番号・キルスタット風テキスト・コードネームが発光。ライブ会場・ゲームセンター・クラブイベントで映える。他社が絶対やっていない仕掛け。
+        </div>
+        <div class="why">
+          <div class="why-label">// WHY IT'S DIFFERENT</div>
+          <p>VSPOのオーロラグッズは「見せる」。espoのUVティーは「隠す→暴く」。体験としての差別化。ライブ演出との連動も可能（UV照明タイム）。</p>
+        </div>
+        <div class="member-chips">
+          <span class="chip">全員対応</span>
+          <span class="chip active">NYX推奨</span>
+          <span class="chip active">KUROI推奨</span>
+          <span class="chip active">ZEFIR推奨</span>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — MOCKUP IMAGE (e.g. Midjourney / DALL-E)</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product mockup of a premium black cotton unisex t-shirt displayed flat lay on dark navy surface. 
+The shirt appears completely matte black in normal light. 
+On the chest area: a barely-visible, subtle UV-reactive silk-screen graphic showing a stylized anime female character silhouette (long midnight-blue hair, sharp violet eyes, tactical coat) rendered in glitch-art style — fragmented, pixelated edges, scanline distortion, HUD crosshair overlay centered on figure.
+Surrounding the figure: faint UI elements — "NO.001 / NYX", kill-count "KD 3.42", targeting reticle, hex grid coordinates — all in neon cyan only visible under UV light (shown as glowing cyan/teal in the mockup).
+Shirt label area: small "espo." wordmark in same UV-reactive ink.
+Lighting: studio product shot, single overhead softbox, dark background #070914.
+Style: high-end streetwear product photography, Acronym/Rick Owens aesthetic, not idol merch.
+<span class="param">--ar 4:5 --style raw --stylize 400 --v 6.1</span>
+<span class="neg">Negative: colorful, bright, pastel, holographic, rainbow, kawaii, idol, white background, text overlay.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reversible Bomber -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 02 — APPAREL</div>
+          <div class="item-name">REVERSIBLE MA-1 BOMBER</div>
+        </div>
+        <span class="item-tag tag-new">CONCEPT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          表面：<strong>マットブラックのMA-1ボンバー</strong>、左胸にespoロゴのみ。裏面：<strong>キャラクター総柄のネオン裏地</strong>。脱いで羽織れば全員集合の派手なアート面が出る。外では目立たず、ライブでは裏返せる。
+        </div>
+        <div class="why">
+          <div class="why-label">// WHY IT'S DIFFERENT</div>
+          <p>VTuberグッズは「常に派手」が多い。リバーシブルで日常使いを可能にし、TPOで切り替えられる大人向け設計。</p>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product design mockup of a reversible MA-1 bomber jacket, shown in two states side by side.
+LEFT: exterior — matte jet-black nylon MA-1, minimal, small "espo." patch embroidered on left chest, ribbed orange-tinted inner collar peeking out, clean tactical aesthetic.
+RIGHT: interior reversed — same jacket worn inside-out revealing chaotic neon lining: dark navy base covered in densely packed anime chibi character silhouettes of 20 female esports VTubers, each labeled with member numbers (001–020), neon cyan and magenta accent colors, crosshair motifs, glitch effects, all-over print.
+Style: premium streetwear lookbook photography, ghost mannequin technique, clean studio.
+<span class="param">--ar 16:9 --style raw --stylize 350 --v 6.1</span>
+<span class="neg">Negative: low quality, realistic face, idol style, bright background, text errors.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Member Color Track Jacket -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 03 — APPAREL</div>
+          <div class="item-name">MEMBER COLOR TRACK JACKET × NYX</div>
+        </div>
+        <span class="item-tag tag-member">MEMBER VARIANT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          各メンバーのブランドカラーで染めた<strong>トラックジャケット</strong>。背面に大きくメンバー名とナンバー。サイドラインがメンバーのシグネチャーカラー。全20種展開。NYX版は<strong>ネイビー×シアン</strong>。
+        </div>
+        <div class="member-chips">
+          <span class="chip active">NYX #2b1055/#7597de</span>
+          <span class="chip">RIKO #f8d34a</span>
+          <span class="chip">GINKO #c0c0c0</span>
+          <span class="chip">+ 17 more</span>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — NYX VARIANT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product mockup of a women's athletic track jacket, retro-sport style.
+Base color: deep midnight navy #2b1055, satin-finish polyester.
+Side panel piping and cuff stripes: electric blue #7597de and neon cyan #36f0ff.
+Left chest: small "espo." logo embroidered in silver thread.
+Back: large "NYX" text in bold condensed font, below it "NO.001" in smaller monospace, subtle constellation motif (stars, dotted lines) printed in silver/cyan on the back panel.
+Right sleeve: small rectangular patch reading "FPS" in technical font.
+Style: esports team apparel product photography, ghost mannequin, dark studio backdrop.
+<span class="param">--ar 4:5 --style raw --stylize 300 --v 6.1</span>
+<span class="neg">Negative: idol outfit, dress, skirt, pink, holographic, kawaii, text errors, extra limbs.</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== CATEGORY 02: ACCESSORIES ===== -->
+  <div class="section-label">02 / ACCESSORIES</div>
+  <h2><span class="m">TACTICAL</span> <span class="s">CARRY</span>.</h2>
+
+  <div class="item-grid">
+
+    <!-- Dog Tag Set -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 04 — ACCESSORIES</div>
+          <div class="item-name">MEMBER DOG TAG SET</div>
+        </div>
+        <span class="item-tag tag-new">CONCEPT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          軍用ドッグタグをモチーフにしたメンバー別アクセサリー。<strong>メンバー番号・コードネーム・ゲームロール・KDレシオ・ブラッドタイプ代わりに「FPS/MMO/FGT」</strong>が刻印。シルバーとブラックの2枚セット（本物の軍用ドッグタグ仕様）。チェーン付き。VSPOのアクリルスタンドとは全く異なるアプローチ。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product photography of a set of two military-style metal dog tags on a ball chain necklace, displayed on dark brushed metal surface.
+Tag 1 (silver, polished): laser-engraved text reading:
+"NYX / NO.001 / ROLE: FPS / K/D 3.42 / espo. VTES PROJECT"
+with small crosshair icon and star constellation motif engraved.
+Tag 2 (matte black PVD coated): same info in reverse, with the espo snowflake/crystal logo engraved prominently.
+Both tags: rounded rectangle shape, standard military proportions, small notch at bottom.
+Styling: close-up product shot, moody blue rim lighting, dark navy background, chain draped naturally.
+<span class="param">--ar 1:1 --style raw --stylize 250 --v 6.1</span>
+<span class="neg">Negative: plastic, colorful, bright, kawaii, acrylic, idol merchandise, text errors.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tactical Sling Bag -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 05 — ACCESSORIES</div>
+          <div class="item-name">TACTICAL SLING BAG / espo EDC</div>
+        </div>
+        <span class="item-tag tag-new">CONCEPT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          オーロラトートへのアンチテーゼ。<strong>タクティカルスリングバッグ（サコッシュ）</strong>でESPORTS DAILY CARRY。MOLLEウェビング・モジュラーパッチスロット・メンバーPVCパッチが差し替え可能。パッチは別売りで全メンバー分展開。「推しパッチを自分のバッグに」という体験設計。
+        </div>
+        <div class="why">
+          <div class="why-label">// WHY IT'S DIFFERENT</div>
+          <p>他社はエコバッグ・トートが多い。タクティカルバッグ×交換式パッチは機能的でファンが「育てる」プロダクト。</p>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — BAG</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product mockup of a tactical sling bag / crossbody EDC bag in matte black 500D Cordura nylon.
+Design features: MOLLE webbing panel on front, multiple pockets, YKK zippers in neon cyan color, small espo. logo patch on top handle loop.
+Front MOLLE panel has 3 velcro PVC patches attached: one reads "espo." in clean block letters, one shows a crosshair icon with "NO.001 NYX", one shows "FPS ★" with star rating system.
+Bag proportions: medium sling, worn across body.
+Background: dark studio, rim lighting in cyan, laid flat on concrete texture.
+Style: tactical gear / techwear product photography, not streetwear cute.
+<span class="param">--ar 4:5 --style raw --stylize 300 --v 6.1</span>
+<span class="neg">Negative: pastel, holographic, tote bag shape, canvas, idol branding, bright colors, low detail.</span></pre>
+        </div>
+        <div class="prompt-block" style="margin-top:12px;">
+          <div class="prompt-label">
+            <span>// PROMPT — PVC PATCH (MEMBER VARIANT / RIKO)</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product photo of a rectangular PVC rubber velcro-back morale patch, 80mm × 50mm.
+Design: dark navy background, stylized anime chibi face silhouette of a girl with short spiky amber/gold hair and sharp amber eyes (fighting game player character). 
+Text: "RIKO / NO.004 / FGT / K/D 7.11" in bold monospace font.
+Border: thin neon yellow-amber (#f8d34a) outline.
+Corner detail: small lightning bolt icon.
+Background of patch shows subtle fighting game combo-arrow motifs in very dark tones.
+Style: macro product photography, sharp detail, dark background.
+<span class="param">--ar 3:2 --style raw --stylize 200 --v 6.1</span>
+<span class="neg">Negative: embroidery, woven, fabric texture, blurry, low detail, text errors.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading Card -->
+    <div class="item-card featured">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 06 — COLLECTIBLE</div>
+          <div class="item-name">ESPO TACTICAL CARD — ホログラフィックトレーディングカード</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span class="item-tag tag-new">CONCEPT</span>
+          <span class="item-tag tag-member">全20種</span>
+        </div>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          VSPOのオーロラトートへの直接的な対抗軸。<strong>ゲームのキャラクターカード</strong>をリアルグッズに。TCG（トレーディングカードゲーム）フォーマット（63×88mm）。各メンバーのキャラクターアート＋実際のゲームスタット（KD・ストリーム時間・ロール）を印刷。<strong>ホログラフィック箔押し+浮き出し加工</strong>でレアリティ演出。レア・スーパーレア・シークレットの封入率設定でガチャ体験。
+        </div>
+        <div class="why">
+          <div class="why-label">// WHY IT'S DIFFERENT</div>
+          <p>VSPOのオーロラはイベント限定のトレンド商品。espoのトレーディングカードは「集める・交換する・眺める」の長期的コレクション体験。esportsとTCGのクロスオーバーは前例がない。</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="prompt-block">
+            <div class="prompt-label">
+              <span>// PROMPT — CARD FRONT (NYX / SR HOLO)</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+            </div>
+            <pre class="prompt-text">Product mockup of a premium trading card (63×88mm, TCG standard) displayed at slight angle on dark surface with dramatic lighting.
+CARD DESIGN:
+- Background: deep midnight navy gradient with subtle star constellation pattern and fine hex grid
+- Main art: anime-style waist-up illustration of a female esports VTuber with long straight midnight-blue hair with silver streaks, violet glowing eyes, asymmetric dark tactical coat with cyan trim, serious expression, dynamic 3/4 pose
+- Character occupies 70% of card height
+- Top banner: "espo." logo left, "SUPER RARE" right in small gold text, card number "001/200" far right
+- Bottom data panel (black strip): 
+  "NYX / ニクス" in large display font
+  "FPS ★★★★★" role indicator
+  Stats in monospace: "K/D 3.42 | HRS 4.2K | DEBUT 2021"
+  Flavor text italic: "闇夜を切り裂くエース。反応速度、異常。"
+- Card border: holographic rainbow foil treatment (shown as iridescent shimmer in photo)
+- Card texture: premium linen finish with spot UV on character
+Photo lighting: dramatic side lighting showing holographic shimmer effect.
+<span class="param">--ar 5:7 --style raw --stylize 500 --v 6.1</span>
+<span class="neg">Negative: text errors, blurry art, low detail, western cartoon, realistic photo face, white background.</span></pre>
+          </div>
+          <div class="prompt-block">
+            <div class="prompt-label">
+              <span>// PROMPT — BOOSTER PACK</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+            </div>
+            <pre class="prompt-text">Product photography of a premium trading card booster pack.
+Pack design: matte black foil wrapper, 80mm × 120mm.
+Front: large "espo." wordmark in neon cyan, below it "TACTICAL CARD — SERIES 01" in condensed font. 
+Partial character artwork visible — just silhouettes of multiple anime female characters in dramatic poses, backlit in neon cyan and magenta.
+Bottom: "5 CARDS PER PACK | 1 GUARANTEED RARE"
+Pack finish: matte black base with gloss UV spot on logo and character silhouettes.
+Photo: multiple packs fanned out on dark brushed steel surface, moody rim lighting in cyan.
+Style: high-end TCG product photography (like Pokemon/Weiss Schwarz premium releases).
+<span class="param">--ar 4:5 --style raw --stylize 400 --v 6.1</span>
+<span class="neg">Negative: bright colors, pastel, holographic rainbow, cheaply printed, blurry, text errors.</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== CATEGORY 03: LIFESTYLE ===== -->
+  <div class="section-label">03 / LIFESTYLE / DESK</div>
+  <h2>GAME <span class="a">SETUP</span> <span class="s">GOODS</span>.</h2>
+
+  <div class="item-grid">
+
+    <!-- Character Mousepad -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 07 — DESK</div>
+          <div class="item-name">XL DESKMAT — CHARACTER EDITION × GINKO</div>
+        </div>
+        <span class="item-tag tag-member">MEMBER VARIANT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          900×400mm大判デスクマット。<strong>キャラクターのフルボディアート×HUD/ゲーム画面風レイアウト</strong>。普段使いの机がゲーミングセットアップになる。「キャラクターと一緒にプレイする」体験。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — GINKO VARIANT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product mockup of an XL gaming desk mat (900×400mm), displayed flat on a gaming desk with keyboard and mouse visible at edges for scale.
+Desk mat design:
+- Background: deep dark navy #2b2b2b with subtle silver geometric grid pattern
+- Right 60%: large anime-style full-body illustration of female character with long straight silver ponytail, straight bangs, sharp steel-gray eyes, wearing modern samurai-inspired gi with black hakama, katana at hip, wrist wraps — dynamic standing pose, slight forward lean
+- Left 40%: dark area designed as "HUD panel" with: member stats in monospace font, "NO.013 / GINKO" large text, "FGT ★★★★★" role display, fake health/energy bars in silver/white, corner crosshair decorations
+- Bottom edge: thin silver + dark red accent stripe running full width
+- "espo." small wordmark bottom left corner
+Photo style: overhead product photography, clean gaming desk setup, dark moody lighting.
+<span class="param">--ar 9:4 --style raw --stylize 350 --v 6.1</span>
+<span class="neg">Negative: bright background, pastel colors, text errors, wrong proportions, blurry character.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thermos / Tumbler -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 08 — LIFESTYLE</div>
+          <div class="item-name">TACTICAL TUMBLER — SWAPPABLE SLEEVE</div>
+        </div>
+        <span class="item-tag tag-new">CONCEPT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          <strong>マットブラックのステンレスタンブラー</strong>本体＋交換式シリコンスリーブシステム。スリーブは全20メンバー分展開（別売り）。「推し替え」が楽しめる機能的グッズ。蓋に小さなespoロゴのレーザー刻印。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product photography of a premium matte black stainless steel insulated tumbler (500ml, tapered shape) with a removable silicone sleeve.
+The sleeve shown on tumbler: dark navy silicone with printed design — full wrap featuring an anime chibi-style female character with long orange-to-red gradient ponytail (HANABI, fireworks motif), surrounded by small chrysanthemum firework burst icons, member number "NO.017" prominent, neon orange-red accent color throughout.
+Tumbler lid: matte black with small "espo." laser-etched logo.
+Bottom of sleeve: thin accent stripe in member color.
+Next to main product: 2-3 additional bare sleeves in different colors (showing the swappable system), each with different member's accent color.
+Style: premium lifestyle product photography, dark background, warm rim lighting.
+<span class="param">--ar 4:5 --style raw --stylize 300 --v 6.1</span>
+<span class="neg">Negative: bright colors, holographic, glass material, text errors, kawaii pastel.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Neon Sign -->
+    <div class="item-card featured">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 09 — ROOM / COLLECTABLE</div>
+          <div class="item-name">LED NEON SIGN — メンバーコードネーム</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span class="item-tag tag-new">HIGH-END</span>
+          <span class="item-tag tag-member">全20種</span>
+        </div>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          部屋に飾れる<strong>LEDネオンサイン（フレキシブルLEDチューブ）</strong>。メンバーのコードネームをネオン文字で。バックプレート：アクリル黒。発光色はメンバーカラー。USB給電。「推しの名前が光る」という圧倒的な存在感。他のVTuber事務所で定番グッズ化していないプレミアムアイテム。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — NYX VARIANT</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product photography of an LED neon sign wall decoration.
+Design: The word "NYX" in a mix of hand-lettered and technical condensed font style, rendered in flexible LED neon tubes, glowing electric blue-violet color (#7597de).
+Below the name, smaller text: "NO.001" in a simpler geometric neon line.
+Mounted on: matte black rectangular acrylic backing board, approximately 40cm × 20cm.
+Small "espo." text in smaller cyan neon in bottom-right corner of board.
+The sign is photographed:
+- Mounted on a dark bedroom wall in a gaming setup
+- Night scene, the neon provides the main ambient lighting
+- Keyboard and desk visible below, slightly out of focus
+- Lens flare and neon glow bloom effect on surrounding surfaces
+- USB cable barely visible going to power bank
+Style: atmospheric gaming room photography, neon aesthetics, not flat product shot.
+<span class="param">--ar 3:2 --style raw --stylize 450 --v 6.1</span>
+<span class="neg">Negative: daytime, bright room, text errors, wrong font feel, cheap LED strip, incorrect glow color.</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== CATEGORY 04: PRINT / PAPER ===== -->
+  <div class="section-label">04 / PRINT / ART</div>
+  <h2><span class="s">LIMITED</span> <span class="a">PRINT</span>.</h2>
+
+  <div class="item-grid">
+
+    <!-- Numbered Art Print -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 10 — ART PRINT</div>
+          <div class="item-name">NUMBERED ART PRINT — "FOR THE CROWN" SERIES</div>
+        </div>
+        <span class="item-tag tag-new">LIMITED</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          <strong>シリアルナンバー入りアートプリント</strong>（例：001/500）。キャラクターのシネマティックなキービジュアル。A3またはB2サイズ。縦長のポスター形式で「ゲームの選択画面」「プレイヤーカード」風デザイン。額装して飾れる品質。ナンバリングとサイン（直筆プリント）付きで希少性演出。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — SHIROI / "COMMANDER" SERIES</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">High-quality anime art print design for a limited edition poster, A3 format (297×420mm), numbered edition.
+Character: SHIROI (NO.002) — female esports VTuber with bob cut pure white hair with blue inner layer, ice blue eyes, crisp white esports jersey with tactical gloves, headset around neck, command visor.
+Composition: dramatic low-angle shot, character standing tall in center, slight looking-down expression, confident posture. 
+Background: dark navy to black gradient, ice crystal geometric formations emanating behind her, chess piece silhouettes (queen) scattered in background, fine hex grid overlay at edges.
+Color palette: white, ice blue #36f0ff, deep navy.
+Typography elements (decorative, not main focus): 
+- Top left: "espo." small logo
+- Bottom: "SHIROI / NO.002 / COMMANDER" in technical font
+- Very bottom: "FOR THE CROWN SERIES — 001/500" in tiny monospace
+Art style: cinematic game key visual illustration, similar to League of Legends splash art quality, highly detailed, dramatic lighting from below, volumetric light rays.
+<span class="param">--ar 3:4 --style raw --stylize 600 --v 6.1</span>
+<span class="neg">Negative: chibi, low detail, flat illustration, text errors, multiple characters, messy background.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Glitch Sticker Sheet -->
+    <div class="item-card">
+      <div class="item-head">
+        <div>
+          <div class="item-no">ITEM 11 — STICKER</div>
+          <div class="item-name">GLITCH DATA STICKER SHEET — メンバー別</div>
+        </div>
+        <span class="item-tag tag-member">MEMBER VARIANT</span>
+      </div>
+      <div class="item-body">
+        <div class="item-concept">
+          通常のキャラクターステッカーとの差別化。<strong>グリッチアート加工＋HUD要素</strong>でゲームのバグ画面風。「データが壊れたキャラクター」のビジュアル言語。ホロ加工のホイル素材。防水仕様。PCやゲーミングデバイスに貼った時に「クールに見える」デザイン重視。
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-label">
+            <span>// PROMPT — ZEFIR SHEET</span>
+            <button class="copy-btn" onclick="copyPrompt(this)">COPY</button>
+          </div>
+          <pre class="prompt-text">Product photo of a die-cut holographic sticker sheet (A5 size, 148×210mm) on dark background.
+The sheet contains 12 individual stickers of various sizes, all featuring ZEFIR (NO.020) — anime female character with short pixie violet hair, pale lilac eyes, aerodynamic bodysuit with cape, floating data visor.
+Sticker designs vary:
+- 2x large stickers: full character rendered in glitch-art style — digital fragmentation, scanlines, RGB split, pixel corruption at edges
+- 3x medium stickers: just the face/head with data visor, clean version and glitch version
+- 4x small icon stickers: espo. logo, "NO.020" badge, wind swirl icon, speed lines
+- 3x text stickers: "ZEFIR", "FPS", "UNTOUCHABLE" in technical bold fonts
+All stickers have: holographic foil treatment (rainbow shimmer), die-cut shape, white border.
+Color palette per sticker: dark navy/black base with violet (#b33cff) and pale lilac accents.
+Photo lighting: overhead flat lay, colored gel lighting showing holographic shimmer.
+<span class="param">--ar 3:4 --style raw --stylize 350 --v 6.1</span>
+<span class="neg">Negative: white sticker sheet, pastel colors, text errors, non-holographic, wrong character design.</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== SYSTEM PROMPT ===== -->
+  <div class="section-label">// UNIVERSAL SYSTEM PROMPT</div>
+  <h2><span class="s">BASE</span> <span class="a">PROMPT</span> RULES.</h2>
+
+  <div class="item-card featured">
+    <div class="item-head">
+      <div>
+        <div class="item-no">全プロンプト共通 — 先頭に追加推奨</div>
+        <div class="item-name">ESPO BRAND SYSTEM PROMPT</div>
+      </div>
+      <button class="copy-btn" style="padding:8px 16px;font-size:11px;" onclick="copyPrompt(this)">COPY ALL</button>
+    </div>
+    <div class="item-body">
+      <div class="prompt-block">
+        <div class="prompt-label"><span>// PASTE BEFORE ANY ESPO MERCH PROMPT</span></div>
+        <pre class="prompt-text">BRAND CONTEXT: espo is a fictional Japanese VTuber esports organization. 
+Visual DNA: dark navy (#070914) base, neon cyan (#36f0ff) primary accent, hot magenta (#ff3ea5) secondary, amber (#f8d34a) hazard.
+Aesthetic: tactical / esports / anti-idol / dark streetwear / cyberpunk-adjacent. NOT cute, NOT pastel, NOT holographic rainbow.
+Typography feel: Zen Dots display font, Anton compressed headlines, JetBrains Mono for data/stats.
+Motifs: crosshairs, HUD overlays, hex grids, radar pings, military patches, scanlines, glitch effects, constellation patterns.
+Quality bar: premium product photography or high-end game key visual illustration quality. No cheap mockups.
+Key differentiator from competitors: WHERE others use pastel aurora holographics, espo uses matte dark + selective neon glow.</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function copyPrompt(btn) {
+  const pre = btn.closest('.prompt-block, .item-card')?.querySelector('pre');
+  if (!pre) return;
+  const text = pre.innerText;
+  navigator.clipboard?.writeText(text);
+  const orig = btn.textContent;
+  btn.textContent = 'COPIED ✓';
+  btn.style.color = 'var(--accent)';
+  btn.style.borderColor = 'var(--accent)';
+  setTimeout(() => { btn.textContent = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 1800);
+}
+</script>
+</body>
+</html>
