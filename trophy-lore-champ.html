@@ -1,0 +1,184 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><title>LOREWEAVE CHAMPIONSHIP — espo TROPHIES</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="癒しの女王たち、銀メダルへの道。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Anton&family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="subpage.css">
+<style>
+.article-hero { padding:160px 32px 80px; max-width:1400px; margin:0 auto; border-bottom:1px solid var(--line); position:relative; overflow:hidden; }
+.article-hero-bg { position:absolute; inset:0; pointer-events:none; }
+.article-meta { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:24px; }
+.article-tag { font-family:var(--font-mono); font-size:11px; padding:3px 10px; letter-spacing:.15em; }
+.tag-game { border:1px solid var(--accent); color:var(--accent); }
+.tag-rank-1 { background:var(--accent-3); color:#000; font-weight:700; }
+.tag-rank-2 { background:#c0c0c0; color:#000; font-weight:700; }
+.tag-rank-3 { background:#cd7f32; color:#000; font-weight:700; }
+.article-date { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.2em; }
+.article-title { font-family:var(--font-display); font-size:clamp(36px,6vw,96px); line-height:.9; margin:0 0 16px; font-weight:900; text-transform:uppercase; }
+.article-sub { font-family:var(--font-head); font-size:18px; color:var(--ink-2); letter-spacing:.08em; }
+.article-team { display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+.team-chip { font-family:var(--font-mono); font-size:11px; padding:4px 10px; border:1px solid var(--line); color:var(--ink-2); letter-spacing:.1em; }
+
+.article-body { max-width:860px; margin:0 auto; padding:64px 32px 120px; }
+.article-body h2 { font-family:var(--font-display); font-size:clamp(24px,3vw,40px); margin:48px 0 16px; text-transform:uppercase; color:var(--accent); }
+.article-body h3 { font-family:var(--font-head); font-size:20px; letter-spacing:.08em; margin:32px 0 12px; text-transform:uppercase; color:var(--ink); }
+.article-body p { font-size:16px; line-height:1.9; color:var(--ink-2); margin:0 0 20px; }
+.article-body strong { color:var(--ink); }
+
+.photo-placeholder { 
+  position:relative; background:var(--panel); border:1px solid var(--line); 
+  overflow:hidden; margin:32px 0; 
+}
+.photo-placeholder img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-placeholder .ph-inner {
+  aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  background:linear-gradient(135deg,var(--bg),var(--panel));
+}
+.photo-placeholder .ph-label { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.25em; }
+.photo-placeholder .ph-desc { font-size:13px; color:var(--ink-3); text-align:center; max-width:400px; line-height:1.6; }
+.photo-placeholder .ph-tag { font-family:var(--font-mono); font-size:9px; color:var(--ink-3); letter-spacing:.15em; position:absolute; bottom:12px; right:12px; }
+.photo-placeholder.half { float:right; width:48%; margin-left:24px; margin-bottom:16px; }
+.photo-placeholder.half .ph-inner { aspect-ratio:4/3; }
+
+.talk { background:var(--panel); border-left:3px solid var(--accent); padding:24px 28px; margin:32px 0; }
+.talk-name { font-family:var(--font-display); font-size:14px; color:var(--accent); letter-spacing:.15em; margin-bottom:10px; }
+.talk-name.mag { color:var(--accent-2); }
+.talk-name.gold { color:var(--accent-3); }
+.talk p { margin:0; font-size:15px; color:var(--ink-2); line-height:1.8; }
+
+.score-block { background:var(--bg); border:1px solid var(--line); padding:24px; margin:32px 0; }
+.score-title { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.25em; margin-bottom:16px; }
+.score-row { display:grid; grid-template-columns:1fr auto auto; gap:16px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:13px; }
+.score-row:last-child { border-bottom:0; }
+.score-row .team { color:var(--ink); }
+.score-row .result { color:var(--accent-3); font-weight:700; font-size:18px; }
+.score-row .detail { color:var(--ink-3); font-size:11px; }
+
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:32px 0; }
+.stat-item { background:var(--panel); border:1px solid var(--line); padding:16px; text-align:center; }
+.stat-item .val { font-family:var(--font-display); font-size:32px; font-weight:900; color:var(--accent); line-height:1; }
+.stat-item .lbl { font-family:var(--font-mono); font-size:9px; color:var(--ink-3); letter-spacing:.2em; margin-top:4px; }
+
+.related { margin-top:64px; padding-top:40px; border-top:1px solid var(--line); }
+.related h4 { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.25em; margin-bottom:20px; }
+.related-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.related-card { background:var(--panel); border:1px solid var(--line); padding:16px; cursor:pointer; transition:all .2s; text-decoration:none; color:var(--ink); display:block; }
+.related-card:hover { border-color:var(--accent); }
+.related-card .rc-rank { font-family:var(--font-display); font-size:28px; font-weight:900; }
+.related-card .rc-event { font-family:var(--font-head); font-size:13px; letter-spacing:.05em; margin-top:4px; }
+.related-card .rc-date { font-family:var(--font-mono); font-size:10px; color:var(--ink-3); margin-top:8px; }
+
+.clearfix::after { content:""; display:table; clear:both; }
+@media(max-width:680px){ .photo-placeholder.half { float:none; width:100%; margin-left:0; } .stats-bar{grid-template-columns:1fr 1fr;} .related-grid{grid-template-columns:1fr;} }
+</style>
+</head><body><nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">e</span><span>espo<span style="color:var(--accent)">.</span></span></a>
+    <div class="nav-links">
+      <a href="index.html#live">LIVE</a>
+      <a href="index.html#members">MEMBERS</a>
+      <a href="trophies.html" style="color:var(--accent)">TROPHIES</a>
+      <a href="index.html#media">MEDIA</a>
+      <a href="store.html">GOODS</a>
+    </div>
+    <div class="nav-cta" style="display:flex;align-items:center;">
+      <div class="lang-toggle"><button class="on">JP</button><button>EN</button></div>
+      <a href="audition.html" class="btn btn-solid">AUDITION →</a>
+    </div>
+  </div>
+</nav>
+<button class="back-btn" onclick="history.back()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  BACK
+</button>
+<section class="article-hero">
+  <div class="article-hero-bg" style="background:radial-gradient(ellipse at 60% 40%,color-mix(in oklab,#c0c0c0 12%,transparent),transparent 60%);"></div>
+  <div style="position:relative;">
+    <div class="article-meta">
+      <span class="article-tag tag-rank-2">2ND PLACE</span>
+      <span class="article-tag tag-game">LOREWEAVE</span>
+      <span class="article-date">2025.10.15</span>
+    </div>
+    <h1 class="article-title">LOREWEAVE CHAMPIONSHIP</h1>
+    <p class="article-sub">癒しの女王たち、銀メダルへの道。</p>
+    <div class="article-team">
+      <span class="team-chip">KOMORI</span><span class="team-chip">PIPPA</span><span class="team-chip">HIRU</span>
+      <span class="team-chip" style="color:var(--accent-3);border-color:var(--accent-3);">PRIZE ¥800,000</span>
+    </div>
+  </div>
+</section>
+<div class="article-body">
+  
+<h2>MMO部門、初の決勝進出</h2>
+<p>espoのMMO部門にとって初の大舞台となった<strong>LOREWEAVE CHAMPIONSHIP 2025</strong>。KOMORI、PIPPA、HIRUの3名が担ったのは「サポート・ヒーラー特化編成」という、攻撃力よりも<strong>持続力と回復量</strong>で圧倒するespo独自のスタイルだった。</p>
+
+
+<div class="photo-placeholder">
+  <img src="images/event-loreweave-match.png" alt="KOMORI、PIPPA、HIRUの試合中">
+  <div class="ph-tag">PHOTO_001 — MATCH</div>
+</div>
+
+<p>準決勝では格上とされた「CRYSTAL VANGUARD」を圧倒。KOMORIの回復量は大会記録を塗り替え、PIIPPAの元気な声がチームの空気を常に明るく保ち続けた。</p>
+
+<div class="score-block">
+  <div class="score-title">// CHAMPIONSHIP FINAL</div>
+  <div class="score-row"><span class="team">IRON CROWN (優勝)</span><span class="result">2</span><span class="detail">WIN</span></div>
+  <div class="score-row"><span class="team">espo (準優勝)</span><span class="result">1</span><span class="detail">WIN</span></div>
+  <div class="score-row" style="grid-template-columns:1fr;padding-top:12px;"><span style="font-size:11px;color:var(--ink-3);">KOMORI 大会最多ヒール量 / PIPPA MVP次点</span></div>
+</div>
+
+<h2>PIIPPAの泣き笑い</h2>
+
+<div class="talk">
+  <div class="talk-name mag">PIPPA / NO.006</div>
+  <p>「準優勝かぁ…。最初は悔しくて泣いてたんですけど、KOMORI先輩に『よくやった』って頭撫でてもらったら、なんか嬉しくなっちゃって（笑）。あの会場で戦えたことが全部夢みたいで。次は絶対優勝しに行きます！」</p>
+</div>
+
+<div class="talk">
+  <div class="talk-name">KOMORI / NO.003</div>
+  <p>「HIRUが最後まで倒れなかった。あのタンク力があってこその決勝進出だった。私たちのスタイルは間違ってなかったって証明できたと思う。来年、必ずリベンジする。」</p>
+</div>
+
+<div class="talk">
+  <div class="talk-name">HIRU / NO.009</div>
+  <p>「……次は、倒れない。」</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="val">2位</div><div class="lbl">FINAL RANK</div></div>
+  <div class="stat-item"><div class="val" style="color:var(--accent-2);">∞</div><div class="lbl">KOMORI HEALS</div></div>
+  <div class="stat-item"><div class="val">0</div><div class="lbl">HIRU DEATHS</div></div>
+  <div class="stat-item"><div class="val">¥800K</div><div class="lbl">PRIZE</div></div>
+</div>
+
+
+<div class="photo-placeholder">
+  <img src="images/event-loreweave-medals.png" alt="銀メダルを掲げる3人">
+  <div class="ph-tag">PHOTO_002 — SILVER MEDAL</div>
+</div>
+
+  <div class="related">
+    <h4>// OTHER TROPHIES</h4>
+    <div class="related-grid">
+      
+      <a href="trophy-neo-s5.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">NEO LEAGUE SEASON 5</div>
+        <div class="rc-date">2025.12.20 — VALORITE</div>
+      </a>
+      <a href="trophy-fgt-wc.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">FGT WORLD CUP 2025</div>
+        <div class="rc-date">2025.11.02 — FGT WORLD</div>
+      </a>
+      <a href="trophy-val-inv.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">VALORITE INVITATIONAL</div>
+        <div class="rc-date">2025.09.08 — VALORITE</div>
+      </a>
+    </div>
+  </div>
+</div>
+<footer class="foot"><div class="foot-top"><div><div class="foot-big"><span class="stroke">FOR</span> <span class="accent">THE</span><br><span class="accent">CROWN</span>.</div><div class="foot-caption">espo — VIRTUAL ESPORTS PROJECT © 2026</div></div><div class="foot-col"><h5>SITE</h5><ul><li><a href="about.html">ABOUT</a></li><li><a href="index.html#members">MEMBERS</a></li><li><a href="trophies.html">TROPHIES</a></li><li><a href="index.html#media">MEDIA</a></li></ul></div><div class="foot-col"><h5>SUPPORT</h5><ul><li><a href="fanclub.html">FAN CLUB</a></li><li><a href="store.html">STORE</a></li><li><a href="guidelines.html">GUIDELINES</a></li><li><a href="faq.html">FAQ</a></li></ul></div><div class="foot-col"><h5>COMPANY</h5><ul><li><a href="corporate.html">CORPORATE</a></li><li><a href="careers.html">CAREERS</a></li><li><a href="contact.html">CONTACT</a></li><li><a href="press.html">PRESS</a></li></ul></div></div><div class="foot-bot"><div>© 2026 espo. ALL RIGHTS RESERVED. — 架空のブランドです。</div></div></footer></body></html>

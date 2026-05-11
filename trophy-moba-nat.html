@@ -1,0 +1,168 @@
+<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><title>MOBA NATION — espo TROPHIES</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="月光の魔女と影の暗殺者、銅メダル争いを制す。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Dots&family=Anton&family=Oswald:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="subpage.css">
+<style>
+.article-hero { padding:160px 32px 80px; max-width:1400px; margin:0 auto; border-bottom:1px solid var(--line); position:relative; overflow:hidden; }
+.article-hero-bg { position:absolute; inset:0; pointer-events:none; }
+.article-meta { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:24px; }
+.article-tag { font-family:var(--font-mono); font-size:11px; padding:3px 10px; letter-spacing:.15em; }
+.tag-game { border:1px solid var(--accent); color:var(--accent); }
+.tag-rank-1 { background:var(--accent-3); color:#000; font-weight:700; }
+.tag-rank-2 { background:#c0c0c0; color:#000; font-weight:700; }
+.tag-rank-3 { background:#cd7f32; color:#000; font-weight:700; }
+.article-date { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.2em; }
+.article-title { font-family:var(--font-display); font-size:clamp(36px,6vw,96px); line-height:.9; margin:0 0 16px; font-weight:900; text-transform:uppercase; }
+.article-sub { font-family:var(--font-head); font-size:18px; color:var(--ink-2); letter-spacing:.08em; }
+.article-team { display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+.team-chip { font-family:var(--font-mono); font-size:11px; padding:4px 10px; border:1px solid var(--line); color:var(--ink-2); letter-spacing:.1em; }
+
+.article-body { max-width:860px; margin:0 auto; padding:64px 32px 120px; }
+.article-body h2 { font-family:var(--font-display); font-size:clamp(24px,3vw,40px); margin:48px 0 16px; text-transform:uppercase; color:var(--accent); }
+.article-body h3 { font-family:var(--font-head); font-size:20px; letter-spacing:.08em; margin:32px 0 12px; text-transform:uppercase; color:var(--ink); }
+.article-body p { font-size:16px; line-height:1.9; color:var(--ink-2); margin:0 0 20px; }
+.article-body strong { color:var(--ink); }
+
+.photo-placeholder { 
+  position:relative; background:var(--panel); border:1px solid var(--line); 
+  overflow:hidden; margin:32px 0; 
+}
+.photo-placeholder img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-placeholder .ph-inner {
+  aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  background:linear-gradient(135deg,var(--bg),var(--panel));
+}
+.photo-placeholder .ph-label { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.25em; }
+.photo-placeholder .ph-desc { font-size:13px; color:var(--ink-3); text-align:center; max-width:400px; line-height:1.6; }
+.photo-placeholder .ph-tag { font-family:var(--font-mono); font-size:9px; color:var(--ink-3); letter-spacing:.15em; position:absolute; bottom:12px; right:12px; }
+.photo-placeholder.half { float:right; width:48%; margin-left:24px; margin-bottom:16px; }
+.photo-placeholder.half .ph-inner { aspect-ratio:4/3; }
+
+.talk { background:var(--panel); border-left:3px solid var(--accent); padding:24px 28px; margin:32px 0; }
+.talk-name { font-family:var(--font-display); font-size:14px; color:var(--accent); letter-spacing:.15em; margin-bottom:10px; }
+.talk-name.mag { color:var(--accent-2); }
+.talk-name.gold { color:var(--accent-3); }
+.talk p { margin:0; font-size:15px; color:var(--ink-2); line-height:1.8; }
+
+.score-block { background:var(--bg); border:1px solid var(--line); padding:24px; margin:32px 0; }
+.score-title { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.25em; margin-bottom:16px; }
+.score-row { display:grid; grid-template-columns:1fr auto auto; gap:16px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:13px; }
+.score-row:last-child { border-bottom:0; }
+.score-row .team { color:var(--ink); }
+.score-row .result { color:var(--accent-3); font-weight:700; font-size:18px; }
+.score-row .detail { color:var(--ink-3); font-size:11px; }
+
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:32px 0; }
+.stat-item { background:var(--panel); border:1px solid var(--line); padding:16px; text-align:center; }
+.stat-item .val { font-family:var(--font-display); font-size:32px; font-weight:900; color:var(--accent); line-height:1; }
+.stat-item .lbl { font-family:var(--font-mono); font-size:9px; color:var(--ink-3); letter-spacing:.2em; margin-top:4px; }
+
+.related { margin-top:64px; padding-top:40px; border-top:1px solid var(--line); }
+.related h4 { font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:.25em; margin-bottom:20px; }
+.related-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.related-card { background:var(--panel); border:1px solid var(--line); padding:16px; cursor:pointer; transition:all .2s; text-decoration:none; color:var(--ink); display:block; }
+.related-card:hover { border-color:var(--accent); }
+.related-card .rc-rank { font-family:var(--font-display); font-size:28px; font-weight:900; }
+.related-card .rc-event { font-family:var(--font-head); font-size:13px; letter-spacing:.05em; margin-top:4px; }
+.related-card .rc-date { font-family:var(--font-mono); font-size:10px; color:var(--ink-3); margin-top:8px; }
+
+.clearfix::after { content:""; display:table; clear:both; }
+@media(max-width:680px){ .photo-placeholder.half { float:none; width:100%; margin-left:0; } .stats-bar{grid-template-columns:1fr 1fr;} .related-grid{grid-template-columns:1fr;} }
+</style>
+</head><body><nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-mark">e</span><span>espo<span style="color:var(--accent)">.</span></span></a>
+    <div class="nav-links">
+      <a href="index.html#live">LIVE</a>
+      <a href="index.html#members">MEMBERS</a>
+      <a href="trophies.html" style="color:var(--accent)">TROPHIES</a>
+      <a href="index.html#media">MEDIA</a>
+      <a href="store.html">GOODS</a>
+    </div>
+    <div class="nav-cta" style="display:flex;align-items:center;">
+      <div class="lang-toggle"><button class="on">JP</button><button>EN</button></div>
+      <a href="audition.html" class="btn btn-solid">AUDITION →</a>
+    </div>
+  </div>
+</nav>
+<button class="back-btn" onclick="history.back()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events:none;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  BACK
+</button>
+<section class="article-hero">
+  <div class="article-hero-bg" style="background:radial-gradient(ellipse at 60% 40%,color-mix(in oklab,#cd7f32 12%,transparent),transparent 60%);"></div>
+  <div style="position:relative;">
+    <div class="article-meta">
+      <span class="article-tag tag-rank-3">3RD PLACE</span>
+      <span class="article-tag tag-game">MOBA</span>
+      <span class="article-date">2025.08.22</span>
+    </div>
+    <h1 class="article-title">MOBA NATION</h1>
+    <p class="article-sub">月光の魔女と影の暗殺者、銅メダル争いを制す。</p>
+    <div class="article-team">
+      <span class="team-chip">TSUKI</span><span class="team-chip">KUROI</span><span class="team-chip">HIRU</span>
+      <span class="team-chip" style="color:var(--accent-3);border-color:var(--accent-3);">PRIZE ¥400,000</span>
+    </div>
+  </div>
+</section>
+<div class="article-body">
+  
+<h2>3位決定戦の激闘</h2>
+<p><strong>MOBA NATION 2025</strong> — espoにとってMOBAジャンルへの本格参戦となった大会。TSUKIの遠距離メイジ、KUROIのアサシン、HIRUのタンクという三角形のシナジーで、強豪チームを次々と撃破した。</p>
+
+
+<div class="photo-placeholder">
+  <img src="images/event-moba-tsuki-ult.png" alt="TSUKIの大規模魔法詠唱シーン">
+  <div class="ph-tag">PHOTO_001</div>
+</div>
+
+<div class="talk">
+  <div class="talk-name">TSUKI / NO.019</div>
+  <p>「KUROIが影から突撃して、HIRUが壁になって、私が後方から全てを薙ぎ払う。3人のロールが完全に噛み合った時の快感は、他のゲームでは味わえない。」</p>
+</div>
+
+<div class="talk">
+  <div class="talk-name mag">KUROI / NO.016</div>
+  <p>「3位決定戦の最終局面、1v2の状況で後ろを振り返ったらTSUKIが来てた。あの魔法が飛んできた瞬間、勝ちを確信した。」</p>
+</div>
+
+<div class="score-block">
+  <div class="score-title">// 3RD PLACE MATCH</div>
+  <div class="score-row"><span class="team">espo</span><span class="result">2</span><span class="detail">WIN</span></div>
+  <div class="score-row"><span class="team">VOID SYNDICATE</span><span class="result">1</span><span class="detail">WIN</span></div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="val">3位</div><div class="lbl">FINAL RANK</div></div>
+  <div class="stat-item"><div class="val">TSUKI</div><div class="lbl">TOP DAMAGE</div></div>
+  <div class="stat-item"><div class="val">KUROI</div><div class="lbl">TOP ASSASSIN</div></div>
+  <div class="stat-item"><div class="val">¥400K</div><div class="lbl">PRIZE</div></div>
+</div>
+
+  <div class="related">
+    <h4>// OTHER TROPHIES</h4>
+    <div class="related-grid">
+      
+      <a href="trophy-neo-s5.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">NEO LEAGUE SEASON 5</div>
+        <div class="rc-date">2025.12.20 — VALORITE</div>
+      </a>
+      <a href="trophy-fgt-wc.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">FGT WORLD CUP 2025</div>
+        <div class="rc-date">2025.11.02 — FGT WORLD</div>
+      </a>
+      <a href="trophy-val-inv.html" class="related-card">
+        <div class="rc-rank" style="color:var(--accent-3)">1ST</div>
+        <div class="rc-event">VALORITE INVITATIONAL</div>
+        <div class="rc-date">2025.09.08 — VALORITE</div>
+      </a>
+    </div>
+  </div>
+</div>
+<footer class="foot"><div class="foot-top"><div><div class="foot-big"><span class="stroke">FOR</span> <span class="accent">THE</span><br><span class="accent">CROWN</span>.</div><div class="foot-caption">espo — VIRTUAL ESPORTS PROJECT © 2026</div></div><div class="foot-col"><h5>SITE</h5><ul><li><a href="about.html">ABOUT</a></li><li><a href="index.html#members">MEMBERS</a></li><li><a href="trophies.html">TROPHIES</a></li><li><a href="index.html#media">MEDIA</a></li></ul></div><div class="foot-col"><h5>SUPPORT</h5><ul><li><a href="fanclub.html">FAN CLUB</a></li><li><a href="store.html">STORE</a></li><li><a href="guidelines.html">GUIDELINES</a></li><li><a href="faq.html">FAQ</a></li></ul></div><div class="foot-col"><h5>COMPANY</h5><ul><li><a href="corporate.html">CORPORATE</a></li><li><a href="careers.html">CAREERS</a></li><li><a href="contact.html">CONTACT</a></li><li><a href="press.html">PRESS</a></li></ul></div></div><div class="foot-bot"><div>© 2026 espo. ALL RIGHTS RESERVED. — 架空のブランドです。</div></div></footer></body></html>
